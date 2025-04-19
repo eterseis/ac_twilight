@@ -1,0 +1,6 @@
+.vs/
+**.sln
+**.vcxproj
+**.vcxproj.**
+Debug/
+ac_twilight/
