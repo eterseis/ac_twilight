@@ -1,17 +1,43 @@
 #include <iostream>
 #include "memory.h"
-#include "Offsets.h"
-
-//moduleBaseAddress + one of these
-constexpr uintptr_t localPlayer{ 0x17E0A8 };
-constexpr uintptr_t entityList{ 0x191FCC };
-constexpr uintptr_t maxEntities{ 0x18AC0C };
+#include "constants.h"
+#include "offsets.h"
+#include "miscellaneous.h"
 
 int main()
 {
-	/*std::cout << "Key Of The Twilight\n";
-	Memory mem{ L"ac_client.exe" };
-	uintptr_t moduleBase = mem.GetModuleBaseAddress(L"ac_client.exe");*/
+	std::cout << "Key Of The Twilight\n";
+	Miscellaneous misc{};
+
+	while (!(GetAsyncKeyState(VK_ESCAPE) & 1))
+	{
+		if (GetAsyncKeyState(VK_INSERT) & 1)
+		{
+			misc.m_health = !misc.m_health;
+		}
+		if (GetAsyncKeyState(VK_DELETE) & 1)
+		{
+			misc.m_ammo = !misc.m_ammo;
+		}
+		if (GetAsyncKeyState(VK_DOWN) & 1)
+		{
+			misc.m_rapidfire = !misc.m_rapidfire;
+		}
+
+		if (misc.m_health)
+		{
+			misc.unlimited_health();
+		}
+		if (misc.m_ammo)
+		{
+			misc.unlimited_ammo();
+		}
+		if (misc.m_rapidfire)
+		{
+			misc.rapidfire();
+		}
+	}
+
 
 	return 0;
 }

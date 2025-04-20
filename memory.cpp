@@ -23,7 +23,7 @@ Memory::Memory(const wchar_t* procName)
 	m_hProcess = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ, false, m_procId);
 }
 
-uintptr_t Memory::GetModuleBaseAddress(const wchar_t* procName)
+const uintptr_t Memory::GetModuleBaseAddress(const wchar_t* procName) const
 {
 	uintptr_t modBaseAddr{};
 	HANDLE hSnap{ CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, m_procId) };

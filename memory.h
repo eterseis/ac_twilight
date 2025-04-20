@@ -14,19 +14,19 @@ public:
 		CloseHandle(m_hProcess);
 	}
 public:
-	uintptr_t GetModuleBaseAddress(const wchar_t* proc);
+	const uintptr_t GetModuleBaseAddress(const wchar_t* proc) const;
 
 	template <typename T>
-	T Read(uintptr_t address)
+	constexpr T Read(uintptr_t address) const
 	{
 		T buffer{};
 		ReadProcessMemory(m_hProcess, (void*)address, &buffer, sizeof(T), nullptr);
 		return buffer;
 	}
-	void ReadString(uintptr_t address, char buffer[], size_t size);
+	void ReadString(uintptr_t address, char buffer[], const size_t size);
 
 	template <typename T>
-	void Write(uintptr_t address, T value)
+	constexpr void Write(uintptr_t address, const T value) const
 	{
 		WriteProcessMemory(m_hProcess, (void*)address, &value, sizeof(T), nullptr);
 	}
