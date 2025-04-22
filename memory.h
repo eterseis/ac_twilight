@@ -17,16 +17,16 @@ public:
 	const uintptr_t GetModuleBaseAddress(const wchar_t* proc) const;
 
 	template <typename T>
-	constexpr T Read(uintptr_t address) const
+	constexpr T Read(const uintptr_t& address) const
 	{
 		T buffer{};
 		ReadProcessMemory(m_hProcess, (void*)address, &buffer, sizeof(T), nullptr);
 		return buffer;
 	}
-	void ReadString(uintptr_t address, char buffer[], const size_t size);
+	const void ReadString(const uintptr_t& address, char buffer[], const size_t size) const;
 
 	template <typename T>
-	constexpr void Write(uintptr_t address, const T value) const
+	constexpr void Write(const uintptr_t& address, const T value) const
 	{
 		WriteProcessMemory(m_hProcess, (void*)address, &value, sizeof(T), nullptr);
 	}

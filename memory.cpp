@@ -47,7 +47,7 @@ const uintptr_t Memory::GetModuleBaseAddress(const wchar_t* procName) const
 	return modBaseAddr;
 }
 
-void Memory::ReadString(uintptr_t address, char buffer[], const size_t size)
+const void Memory::ReadString(const uintptr_t& address, char buffer[], const size_t size) const
 {
 	ReadProcessMemory(m_hProcess, (void*)address, buffer, size, nullptr);
 }

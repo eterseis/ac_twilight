@@ -12,7 +12,7 @@ public:
 	void unlimited_ammo();
 	void rapidfire();
 public:
-	bool m_health;
-	bool m_ammo;
-	bool m_rapidfire;
+	bool m_health{};
+	bool m_ammo{};
+	bool m_rapidfire{};
 };

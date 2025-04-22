@@ -12,7 +12,7 @@ uintptr_t offsets::get_entity_list()
 	return entity_list;
 }
 
-int offsets::get_max_entities()
+size_t offsets::get_max_entities()
 {
 	int max_entities{ mem.Read <int>(moduleBase + offsets::max_entities_addr) };
 	return max_entities;
