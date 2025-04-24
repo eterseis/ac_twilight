@@ -34,7 +34,7 @@ void update_local_player(Entity& myself)
 
 void populate_entity_array(std::array<Entity, 32>& entities, const Entity& myself)
 {
-	size_t current_entities{ offsets::get_max_entities() };
+	const size_t current_entities{ offsets::get_max_entities() - 1 };
 	uintptr_t offset{};
 	for (size_t i{}; i < current_entities; ++i)
 	{

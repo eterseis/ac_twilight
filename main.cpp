@@ -10,9 +10,10 @@
 
 
 bool enable_debug{};
+Miscellaneous misc{};
 std::array<Entity, 32> entities{};
 
-void handle_input(Miscellaneous& misc)
+void handle_input()
 {
 	if (GetAsyncKeyState(VK_INSERT) & 1)
 	{
@@ -32,40 +33,37 @@ void handle_input(Miscellaneous& misc)
 	}
 }
 
-void print_entity(const Entity& ent)
-{
-	std::cout << "address: " << ent.m_address << "\n";
-	std::cout << "name: " << ent.m_name << "\n";
-	std::cout << "health: " << ent.m_health << "\n";
-	std::cout << "team: " << ent.m_team << "\n";
-	std::cout << "isAlive: " << ent.isAlive() << "\n";
-
-	std::cout << "xyz: " << "("
-		<< ent.m_coords.x << ", " << ent.m_coords.y << ", " << ent.m_coords.z << ")\n";
-
-	std::cout << "distance from local player: " << ent.m_distance_from_local_player;
-
-	system("cls");
-}
-
 void debug_mode()
 {
-	size_t current_entities{ offsets::get_max_entities() };
+	const size_t current_entities{ offsets::get_max_entities() - 1 };
 	for (size_t i{}; i < current_entities; ++i)
 	{
-		print_entity(entities[i]);
+		std::cout << std::hex;
+		std::cout << "address: 0x" << entities[i].m_address << "\n";
+		std::cout << "name: " << entities[i].m_name << "\n";
+		std::cout << "health: " << entities[i].m_health << "\n";
+		std::cout << "is alive: " << entities[i].isAlive() << "\n";
+		std::cout << "team: " << entities[i].m_team << "\n";
+
+		std::cout << "coords: (" << entities[i].m_coords.x << ", "
+			<< entities[i].m_coords.y << ", "
+			<< entities[i].m_coords.z << ")\n";
+
+		std::cout << "distance from local player: " << entities[i].m_distance_from_local_player << "\n";
+		std::cout << "---------------------------------------\n";
 	}
+	Sleep(100);
+	system("cls");
+
 }
 
 int main()
 {
 	std::cout << "Key Of The Twilight\n";
-	Miscellaneous misc{};
 
-
-	while (!(GetAsyncKeyState(VK_ESCAPE) & 1))
+	while (true/*!(GetAsyncKeyState(VK_ESCAPE) & 1)*/)
 	{
-		handle_input(misc);
+		handle_input();
 
 		if (misc.m_health)
 		{
@@ -88,6 +86,7 @@ int main()
 		update_local_player(myself);
 
 		populate_entity_array(entities, myself);
+		Maths::bubble_sort(entities);
 	}
 
 
