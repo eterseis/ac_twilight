@@ -32,9 +32,8 @@ void update_local_player(Entity& myself)
 	myself.m_coords.z = mem.Read<float>(myself.m_address + offsets::z_feet_coord);
 }
 
-void populate_entity_array(std::array<Entity, 32>& entities, const Entity& myself)
+void populate_entity_array(std::array<Entity, 32>& entities, const Entity& myself, const size_t current_entities)
 {
-	const size_t current_entities{ offsets::get_max_entities() - 1 };
 	uintptr_t offset{};
 	for (size_t i{}; i < current_entities; ++i)
 	{

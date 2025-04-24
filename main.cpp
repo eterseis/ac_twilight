@@ -33,9 +33,9 @@ void handle_input()
 	}
 }
 
-void debug_mode()
+void debug_mode(const size_t current_entities)
 {
-	const size_t current_entities{ offsets::get_max_entities() - 1 };
+	std::cout << "---DEBUG MODE---\n\n";
 	for (size_t i{}; i < current_entities; ++i)
 	{
 		std::cout << std::hex;
@@ -64,29 +64,33 @@ int main()
 	while (true/*!(GetAsyncKeyState(VK_ESCAPE) & 1)*/)
 	{
 		handle_input();
-
-		if (misc.m_health)
-		{
-			misc.unlimited_health();
-		}
-		if (misc.m_ammo)
-		{
-			misc.unlimited_ammo();
-		}
-		if (misc.m_rapidfire)
-		{
-			misc.rapidfire();
-		}
-		if (enable_debug)
-		{
-			debug_mode();
-		}
+		size_t current_entities{ offsets::get_max_entities() - 1 /*except me*/ };
 
 		Entity myself{};
 		update_local_player(myself);
 
-		populate_entity_array(entities, myself);
-		Maths::bubble_sort(entities);
+		if (misc.m_health)
+		{
+			misc.unlimited_health(myself.m_address);
+		}
+		if (misc.m_ammo)
+		{
+			misc.unlimited_ammo(myself.m_address);
+		}
+		if (misc.m_rapidfire)
+		{
+			misc.rapidfire(myself.m_address);
+		}
+		if (enable_debug)
+		{
+			debug_mode(current_entities);
+		}
+
+		if (current_entities > 0)
+		{
+			populate_entity_array(entities, myself, current_entities);
+			Maths::bubble_sort(entities, current_entities);
+		}
 	}
 
 

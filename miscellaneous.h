@@ -3,14 +3,12 @@
 #include "offsets.h"
 #include "constants.h"
 
-const uintptr_t local_player{ offsets::get_local_player() };
-
 class Miscellaneous
 {
 public:
-	void unlimited_health();
-	void unlimited_ammo();
-	void rapidfire();
+	void unlimited_health(uintptr_t address);
+	void unlimited_ammo(uintptr_t address);
+	void rapidfire(uintptr_t address);
 public:
 	bool m_health{};
 	bool m_ammo{};

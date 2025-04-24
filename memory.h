@@ -20,7 +20,7 @@ public:
 	constexpr T Read(const uintptr_t& address) const
 	{
 		T buffer{};
-		ReadProcessMemory(m_hProcess, (void*)address, &buffer, sizeof(T), nullptr);
+		ReadProcessMemory(m_hProcess, reinterpret_cast<void*>(address), &buffer, sizeof(T), nullptr);
 		return buffer;
 	}
 	const void ReadString(const uintptr_t& address, char buffer[], const size_t size) const;
@@ -28,7 +28,7 @@ public:
 	template <typename T>
 	constexpr void Write(const uintptr_t& address, const T value) const
 	{
-		WriteProcessMemory(m_hProcess, (void*)address, &value, sizeof(T), nullptr);
+		WriteProcessMemory(m_hProcess, reinterpret_cast<void*>(address), &value, sizeof(T), nullptr);
 	}
 private:
 	DWORD m_procId{};

@@ -14,6 +14,7 @@ uintptr_t offsets::get_entity_list()
 
 size_t offsets::get_max_entities()
 {
-	int max_entities{ mem.Read <int>(moduleBase + offsets::max_entities_addr) };
-	return max_entities;
+	size_t max_entities{ mem.Read <size_t>(moduleBase + offsets::max_entities_addr) };
+
+	return (max_entities > 0) ? max_entities : 1;
 }

@@ -13,10 +13,8 @@ double Maths::distance_from_me(Entity& enemy, const Entity& me)
 	return sqrt(p.x + p.y + p.z);
 }
 
-void Maths::bubble_sort(std::array<Entity, 32>& arr)
+void Maths::bubble_sort(std::array<Entity, 32>& arr, const size_t current_entities)
 {
-	size_t current_entities{ offsets::get_max_entities() - 1 /*except local player*/ };
-
 	for (size_t i{}; i < current_entities - 1; i++)
 	{
 		bool flag{};

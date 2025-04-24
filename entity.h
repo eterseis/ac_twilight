@@ -18,4 +18,4 @@ struct Entity
 
 void update_entity_info(Entity& e, Entity& myself);
 void update_local_player(Entity& myself);
-void populate_entity_array(std::array<Entity, 32>& entities, const Entity& myself);
+void populate_entity_array(std::array<Entity, 32>& entities, const Entity& myself, const size_t current_entities);

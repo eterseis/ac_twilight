@@ -37,7 +37,7 @@ const uintptr_t Memory::GetModuleBaseAddress(const wchar_t* procName) const
 		{
 			if (!_wcsicmp(modEntry.szModule, procName))
 			{
-				modBaseAddr = (uintptr_t)modEntry.modBaseAddr;
+				modBaseAddr = reinterpret_cast<uintptr_t>(modEntry.modBaseAddr);
 				break;
 			}
 		} while (Module32Next(hSnap, &modEntry));
@@ -49,5 +49,5 @@ const uintptr_t Memory::GetModuleBaseAddress(const wchar_t* procName) const
 
 const void Memory::ReadString(const uintptr_t& address, char buffer[], const size_t size) const
 {
-	ReadProcessMemory(m_hProcess, (void*)address, buffer, size, nullptr);
+	ReadProcessMemory(m_hProcess, reinterpret_cast<void*>(address), buffer, size, nullptr);
 }
