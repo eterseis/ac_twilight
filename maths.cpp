@@ -1,19 +1,19 @@
-#include <math.h>
+#include <cmath>
 #include "maths.h"
 #include "offsets.h"
 
 
-double Maths::distance_from_me(Entity& enemy, const Entity& me)
+float Maths::distance_from_me(Entity& enemy, const Entity& me)
 {
-	Vector3 p{};
+	Vector3 p;
 	p.x = (enemy.m_coords.x - me.m_coords.x) * (enemy.m_coords.x - me.m_coords.x);
 	p.y = (enemy.m_coords.y - me.m_coords.y) * (enemy.m_coords.y - me.m_coords.y);
 	p.z = (enemy.m_coords.z - me.m_coords.z) * (enemy.m_coords.z - me.m_coords.z);
 
-	return sqrt(p.x + p.y + p.z);
+	return sqrtf(p.x + p.y + p.z);
 }
 
-void Maths::bubble_sort(std::array<Entity, 32>& arr, const size_t current_entities)
+void Maths::bubble_sort(std::array<Entity, 32>& arr, const size_t& current_entities)
 {
 	for (size_t i{}; i < current_entities - 1; i++)
 	{

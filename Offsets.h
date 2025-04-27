@@ -19,6 +19,9 @@ namespace offsets
 	inline constexpr int y_feet_coord{ 0x2C };
 	inline constexpr int z_feet_coord{ 0x30 };
 
+	inline constexpr int yaw{ 0x34 };
+	inline constexpr int pitch{ 0x38 };
+
 	inline constexpr uintptr_t local_player_addr{ 0x17E0A8 };
 	inline constexpr uintptr_t entity_list_addr{ 0x191FCC };
 	inline constexpr uintptr_t max_entities_addr{ 0x18AC0C };

@@ -16,6 +16,12 @@
     <Filter Include="Features">
       <UniqueIdentifier>{1f4a38fc-4db2-4a2a-b28a-f045a7b5e3c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Features\aimbot">
+      <UniqueIdentifier>{fc6b742f-f877-40ae-8b65-9256c59076bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\miscellaneous">
+      <UniqueIdentifier>{fa4a6384-78be-41ee-9281-c176b2b56634}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -23,9 +29,6 @@
     </ClCompile>
     <ClCompile Include="memory.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="miscellaneous.cpp">
-      <Filter>Features</Filter>
     </ClCompile>
     <ClCompile Include="offsets.cpp">
       <Filter>Source Files</Filter>
@@ -36,6 +39,12 @@
     <ClCompile Include="entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="miscellaneous.cpp">
+      <Filter>Features\miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="aimbot.cpp">
+      <Filter>Features\aimbot</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="offsets.h">
@@ -43,9 +52,6 @@
     </ClInclude>
     <ClInclude Include="memory.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="miscellaneous.h">
-      <Filter>Features</Filter>
     </ClInclude>
     <ClInclude Include="constants.h">
       <Filter>Header Files</Filter>
@@ -58,6 +64,12 @@
     </ClInclude>
     <ClInclude Include="vector3.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="miscellaneous.h">
+      <Filter>Features\miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="aimbot.h">
+      <Filter>Features\aimbot</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -7,9 +7,12 @@
 #include "maths.h"
 #include "vector3.h"
 #include <array>
+#include "aimbot.h"
 
 
 bool enable_debug{};
+bool enable_aimbot{};
+
 Miscellaneous misc{};
 std::array<Entity, 32> entities{};
 
@@ -27,19 +30,24 @@ void handle_input()
 	{
 		misc.m_rapidfire = !misc.m_rapidfire;
 	}
+	if (GetAsyncKeyState(VK_UP) & 1)
+	{
+		enable_aimbot = !enable_aimbot;
+	}
 	if (GetAsyncKeyState(VK_F9) & 1)
 	{
 		enable_debug = !enable_debug;
 	}
 }
 
-void debug_mode(const size_t current_entities)
+void debug_mode(const size_t& current_entities)
 {
 	std::cout << "---DEBUG MODE---\n\n";
 	for (size_t i{}; i < current_entities; ++i)
 	{
 		std::cout << std::hex;
 		std::cout << "address: 0x" << entities[i].m_address << "\n";
+		std::cout << std::dec;
 		std::cout << "name: " << entities[i].m_name << "\n";
 		std::cout << "health: " << entities[i].m_health << "\n";
 		std::cout << "is alive: " << entities[i].isAlive() << "\n";
@@ -52,7 +60,7 @@ void debug_mode(const size_t current_entities)
 		std::cout << "distance from local player: " << entities[i].m_distance_from_local_player << "\n";
 		std::cout << "---------------------------------------\n";
 	}
-	Sleep(100);
+	Sleep(10);
 	system("cls");
 
 }
@@ -68,6 +76,12 @@ int main()
 
 		Entity myself{};
 		update_local_player(myself);
+
+		if (current_entities > 0)
+		{
+			populate_entity_array(entities, myself, current_entities);
+			Maths::bubble_sort(entities, current_entities);
+		}
 
 		if (misc.m_health)
 		{
@@ -85,11 +99,9 @@ int main()
 		{
 			debug_mode(current_entities);
 		}
-
-		if (current_entities > 0)
+		if (enable_aimbot)
 		{
-			populate_entity_array(entities, myself, current_entities);
-			Maths::bubble_sort(entities, current_entities);
+			Aimbot::closest_target(get_closest_entity(entities, current_entities), myself);
 		}
 	}
 
