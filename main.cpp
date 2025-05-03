@@ -1,4 +1,5 @@
 #include <iostream>
+#include <array>
 #include "memory.h"
 #include "constants.h"
 #include "offsets.h"
@@ -6,8 +7,14 @@
 #include "entity.h"
 #include "maths.h"
 #include "vector3.h"
-#include <array>
 #include "aimbot.h"
+
+//#include "imgui.h"
+//#include "imgui_impl_glfw.h"
+//#include "imgui_impl_opengl3.h"
+
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
 
 
 bool enable_debug{};
@@ -15,6 +22,7 @@ bool enable_aimbot{};
 
 Miscellaneous misc{};
 std::array<Entity, 32> entities{};
+//Entity entities[32];
 
 void handle_input()
 {
@@ -67,15 +75,48 @@ void debug_mode(const size_t& current_entities)
 
 int main()
 {
-	std::cout << "Key Of The Twilight\n";
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	while (true/*!(GetAsyncKeyState(VK_ESCAPE) & 1)*/)
+	glfwWindowHint(GLFW_FLOATING, GL_TRUE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
+	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GL_TRUE);
+	glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, GL_TRUE);
+
+	GLFWwindow* window{ glfwCreateWindow(800, 600, "twilight", nullptr, nullptr) };
+
+	if (!window)
+	{
+		std::cout << "Failed to create window.\n";
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD\n";
+		return -1;
+	}
+
+	Entity myself;
+	size_t current_entities;
+	std::array<float, 16> view_matrix;
+
+	const int screen_width{ GetSystemMetrics(SM_CXSCREEN) };
+	const int screen_height{ GetSystemMetrics(SM_CYSCREEN) };
+
+	Vector2 line_origin{ 0.0f, -1.0f };
+	while (!glfwWindowShouldClose(window))
 	{
 		handle_input();
-		size_t current_entities{ offsets::get_max_entities() - 1 /*except me*/ };
 
-		Entity myself{};
+		current_entities = offsets::get_max_entities() - 1 /*except me*/;
 		update_local_player(myself);
+		view_matrix = mem.Read<std::array<float, 16>>(moduleBase + offsets::view_matrix);
 
 		if (current_entities > 0)
 		{
@@ -103,8 +144,30 @@ int main()
 		{
 			Aimbot::closest_target(get_closest_entity(entities, current_entities), myself);
 		}
+
+		for (int i{}; i < current_entities; ++i)
+		{
+			Entity& entity{ entities[i] };
+
+			Vector2 screen_coords;
+			if (!Maths::world_to_screen(entity.m_coords, screen_coords, view_matrix, screen_width, screen_height))
+				continue;
+
+			/*glUseProgram(0);
+			glBindVertexArray()*/
+		}
+
+		//RENDERING
+		int display_w, display_h;
+		glfwGetFramebufferSize(window, &display_w, &display_h);
+		glViewport(0, 0, display_w, display_h);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 
-
+	glfwDestroyWindow(window);
+	glfwTerminate();
 	return 0;
 }

@@ -15,10 +15,10 @@ void Aimbot::closest_target(Entity& target, Entity& local_player)
 	float abspos_y = target.m_head_coords.y - local_player.m_head_coords.y;
 	float abspos_z = target.m_head_coords.z - local_player.m_head_coords.z;
 
-	float angle = atan2f(abspos_y, abspos_x);
+	float azimuth_xy = atan2f(abspos_y, abspos_x);
 	float azimuth_z = atan2f(abspos_z, target.m_distance_from_local_player);
 
-	float yaw = angle * (180.0f / pi);
+	float yaw = azimuth_xy * (180.0f / pi);
 	yaw += 90.0f;
 
 	float pitch = azimuth_z * (180.0f / pi);

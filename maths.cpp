@@ -34,3 +34,26 @@ void Maths::bubble_sort(std::array<Entity, 32>& arr, const size_t& current_entit
 			break;
 	}
 }
+
+bool Maths::world_to_screen(Vector3& pos, Vector2& screen, const std::array<float, 16> matrix, int window_width, int window_height)
+{
+	Vector4 convert;
+
+	convert.x = (pos.x * matrix[0]) + (pos.y * matrix[4]) + (pos.z * matrix[8]) + matrix[12];
+	convert.y = (pos.x * matrix[1]) + (pos.y * matrix[5]) + (pos.z * matrix[9]) + matrix[13];
+	convert.z = (pos.x * matrix[2]) + (pos.y * matrix[6]) + (pos.z * matrix[10]) + matrix[14];
+	convert.w = (pos.x * matrix[3]) + (pos.y * matrix[7]) + (pos.z * matrix[11]) + matrix[15];
+
+	if (convert.w < 0.1f)
+		return false;
+
+	Vector3 NDC;
+	NDC.x = convert.x / convert.w;
+	NDC.y = convert.y / convert.w;
+	NDC.z = convert.z / convert.w;
+
+	screen.x = (window_width / 2 * NDC.x) + (NDC.x + window_width / 2);
+	screen.y = -(window_height / 2 * NDC.y) + (NDC.y + window_height / 2);
+
+	return true;
+}

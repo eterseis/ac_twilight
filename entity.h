@@ -4,8 +4,11 @@
 #include "constants.h"
 #include <array>
 
-struct Entity
+class Entity
 {
+public:
+	constexpr bool isAlive() const { return m_health > 0; }
+
 	uintptr_t m_address;
 	char m_name[entity_name_length];
 	int m_health;
@@ -13,8 +16,6 @@ struct Entity
 	Vector3 m_coords;
 	Vector3 m_head_coords;
 	float m_distance_from_local_player;
-
-	constexpr bool isAlive() const { return m_health > 0; }
 };
 
 void update_entity_info(Entity& e, Entity& myself);
