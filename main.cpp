@@ -85,6 +85,7 @@ int main()
 	glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GL_TRUE);
 	glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, GL_TRUE);
+	glfwWindowHint(GLFW_DECORATED, FALSE);
 
 	GLFWwindow* window{ glfwCreateWindow(800, 600, "twilight", nullptr, nullptr) };
 
@@ -95,6 +96,7 @@ int main()
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
+	glfwSwapInterval(1);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -110,13 +112,17 @@ int main()
 	const int screen_height{ GetSystemMetrics(SM_CYSCREEN) };
 
 	Vector2 line_origin{ 0.0f, -1.0f };
+	unsigned int vao, vbo;
 	while (!glfwWindowShouldClose(window))
 	{
 		handle_input();
 
+
 		current_entities = offsets::get_max_entities() - 1 /*except me*/;
 		update_local_player(myself);
-		view_matrix = mem.Read<std::array<float, 16>>(moduleBase + offsets::view_matrix);
+		uintptr_t view_address{ moduleBase + offsets::view_matrix };
+		view_address = view_address - 0x6C + 0X4 * 16;
+		view_matrix = mem.Read<std::array<float, 16>>(view_address);
 
 		if (current_entities > 0)
 		{
@@ -145,7 +151,13 @@ int main()
 			Aimbot::closest_target(get_closest_entity(entities, current_entities), myself);
 		}
 
-		for (int i{}; i < current_entities; ++i)
+		//RENDERING
+		int display_w, display_h;
+		glfwGetFramebufferSize(window, &display_w, &display_h);
+		glViewport(0, 0, display_w, display_h);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		for (size_t i{}; i < current_entities; ++i)
 		{
 			Entity& entity{ entities[i] };
 
@@ -153,19 +165,30 @@ int main()
 			if (!Maths::world_to_screen(entity.m_coords, screen_coords, view_matrix, screen_width, screen_height))
 				continue;
 
-			/*glUseProgram(0);
-			glBindVertexArray()*/
-		}
+			float draw[]{
+				line_origin.x, line_origin.y, 0.0f,
+				screen_coords.x, screen_coords.y, 0.0f
+			};
 
-		//RENDERING
-		int display_w, display_h;
-		glfwGetFramebufferSize(window, &display_w, &display_h);
-		glViewport(0, 0, display_w, display_h);
-		glClear(GL_COLOR_BUFFER_BIT);
+			glGenVertexArrays(1, &vao);
+			glGenBuffers(1, &vbo);
+
+			glBindVertexArray(vao);
+
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(draw), draw, GL_DYNAMIC_DRAW);
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+			glEnableVertexAttribArray(0);
+
+			glDrawArrays(GL_LINES, 0, 6);
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

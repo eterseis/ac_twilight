@@ -53,7 +53,15 @@ bool Maths::world_to_screen(Vector3& pos, Vector2& screen, const std::array<floa
 	NDC.z = convert.z / convert.w;
 
 	screen.x = (window_width / 2 * NDC.x) + (NDC.x + window_width / 2);
-	screen.y = -(window_height / 2 * NDC.y) + (NDC.y + window_height / 2);
+	screen.y = (window_height / 2 * NDC.y) + (NDC.y + window_height / 2);
+
+	screen.x /= window_width;
+	screen.x *= 2.0f;
+	screen.x -= 1.0f;
+
+	screen.y /= window_height;
+	screen.y *= 2.0f;
+	screen.y -= 1.0f;
 
 	return true;
 }
