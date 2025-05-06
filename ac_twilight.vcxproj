@@ -164,6 +164,7 @@
     <ClCompile Include="Dependencies\imgui\imgui_tables.cpp" />
     <ClCompile Include="Dependencies\imgui\imgui_widgets.cpp" />
     <ClCompile Include="entity.cpp" />
+    <ClCompile Include="esp.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maths.cpp" />
@@ -174,7 +175,8 @@
   <ItemGroup>
     <ClInclude Include="aimbot.h" />
     <ClInclude Include="constants.h" />
-    <ClInclude Include="dataTypes.h" />
+    <ClInclude Include="GLCommon.h" />
+    <ClInclude Include="vector.h" />
     <ClInclude Include="Dependencies\imgui\imconfig.h" />
     <ClInclude Include="Dependencies\imgui\imgui.h" />
     <ClInclude Include="Dependencies\imgui\imgui_impl_glfw.h" />
@@ -190,9 +192,6 @@
     <ClInclude Include="memory.h" />
     <ClInclude Include="miscellaneous.h" />
     <ClInclude Include="offsets.h" />
-    <ClInclude Include="vector2.h" />
-    <ClInclude Include="vector3.h" />
-    <ClInclude Include="vector4.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

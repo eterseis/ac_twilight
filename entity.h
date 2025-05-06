@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include "vector3.h"
+#include "vector.h"
 #include "constants.h"
 #include <array>
 
@@ -9,6 +9,7 @@ class Entity
 public:
 	constexpr bool isAlive() const { return m_health > 0; }
 
+	uintptr_t vf_table;
 	uintptr_t m_address;
 	char m_name[entity_name_length];
 	int m_health;

@@ -14,8 +14,3 @@ struct Vector4
 {
 	float x, y, z, w;
 };
-
-struct Matrix
-{
-
-};

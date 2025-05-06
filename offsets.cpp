@@ -18,3 +18,11 @@ size_t offsets::get_max_entities()
 
 	return (max_entities > 0) ? max_entities : 1;
 }
+
+std::array<float, 16> offsets::get_view_matrix()
+{
+	uintptr_t address{ moduleBase + offsets::view_matrix_addr };
+	address = address - 0x6C + 0x4 * 0x10;
+
+	return mem.Read<std::array<float, 16>>(address);
+}

@@ -6,6 +6,8 @@
 
 void update_entity_info(Entity& e, const Entity& myself)
 {
+	e.vf_table = mem.Read<uintptr_t>(e.m_address);
+
 	mem.ReadString(e.m_address + offsets::name, e.m_name, entity_name_length);
 
 	e.m_team = mem.Read<int>(e.m_address + offsets::team);
@@ -24,6 +26,7 @@ void update_entity_info(Entity& e, const Entity& myself)
 void update_local_player(Entity& myself)
 {
 	myself.m_address = offsets::get_local_player();
+	myself.vf_table = mem.Read<uintptr_t>(myself.m_address);
 
 	mem.ReadString(myself.m_address + offsets::name, myself.m_name, entity_name_length);
 

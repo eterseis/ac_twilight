@@ -1,8 +1,6 @@
 #pragma once
 #include "entity.h"
-#include "vector2.h"
-#include "vector3.h"
-#include "vector4.h"
+#include "vector.h"
 #include <array>
 
 namespace Maths
