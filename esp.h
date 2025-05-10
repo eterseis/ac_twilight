@@ -38,6 +38,7 @@ class ESP
 public:
 	bool valid_entity(Entity& ent);
 	void draw_lines(size_t current_entities, std::array<Entity, 32> entities);
+	void draw_boxes(size_t current_entities, std::array<Entity, 32> entities);
 
 public:
 	std::array<float, 16> matrix;

@@ -33,6 +33,7 @@ namespace Options
 
 	//esp
 	bool b_enable_snaplines{};
+	bool b_enable_triangles{};
 
 }
 using namespace std::chrono_literals;
@@ -71,14 +72,18 @@ void handle_input()
 		{
 			Options::b_enable_snaplines = !Options::b_enable_snaplines;
 		}
+		if (GetAsyncKeyState(VK_TAB) & 1)
+		{
+			Options::b_enable_triangles = !Options::b_enable_triangles;
+		}
 		std::this_thread::sleep_for(std::chrono::microseconds(5));
 	}
 }
 
-void debug_mode(const size_t& current_entitiess)
+void debug_mode()
 {
 	std::cout << "---DEBUG MODE---\n\n";
-	for (size_t i{}; i < current_entitiess; ++i)
+	for (size_t i{}; i < current_entities; ++i)
 	{
 		std::cout << std::hex;
 		std::cout << "address: 0x" << entities[i].m_address << "\n";
@@ -135,7 +140,20 @@ void aimbot()
 				Aimbot::closest_target(get_closest_entity(entities, current_entities), myself);
 			}
 		}
-		std::this_thread::sleep_for(std::chrono::microseconds(5));
+		std::this_thread::sleep_for(2ms);
+	}
+}
+
+void populate_and_sort_entities()
+{
+	while (1)
+	{
+		if (current_entities > 0)
+		{
+			populate_entity_array(entities, myself, current_entities);
+			Maths::bubble_sort(entities, current_entities);
+		}
+		std::this_thread::sleep_for(5ms);
 	}
 }
 
@@ -162,7 +180,7 @@ int main()
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-	//glfwSwapInterval(1);
+	glfwSwapInterval(1);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -174,19 +192,21 @@ int main()
 	ESP visuals;
 
 	std::thread thread_handle_input(handle_input);
+	thread_handle_input.detach();
+
 	std::thread thread_misc(miscellaneous);
+	thread_misc.detach();
+
 	std::thread thread_aimbot(aimbot);
+	thread_aimbot.detach();
+
+	std::thread thread_populate_and_sort_entities(populate_and_sort_entities);
+	thread_populate_and_sort_entities.detach();
 
 	while (!glfwWindowShouldClose(window))
 	{
 		current_entities = offsets::get_max_entities() - 1 /*except me*/;
 		update_local_player(myself);
-
-		if (current_entities > 0)
-		{
-			populate_entity_array(entities, myself, current_entities);
-			Maths::bubble_sort(entities, current_entities);
-		}
 
 		//RENDERING
 		int display_w, display_h;
@@ -198,6 +218,12 @@ int main()
 		{
 			visuals.matrix = offsets::get_view_matrix();
 			visuals.draw_lines(current_entities, entities);
+		}
+
+		if (Options::b_enable_triangles)
+		{
+			visuals.matrix = offsets::get_view_matrix();
+			visuals.draw_boxes(current_entities, entities);
 		}
 
 		glfwSwapBuffers(window);

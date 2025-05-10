@@ -59,10 +59,64 @@ void ESP::draw_lines(size_t current_entities, std::array<Entity, 32> entities)
 		glEnableVertexAttribArray(0);
 
 		//glUseProgram(shader_program);
-		glDrawArrays(GL_LINES, 0, 6);
+		glDrawArrays(GL_LINES, 0, 2);
 
 		glDeleteVertexArrays(1, &vao);
 		glDeleteBuffers(1, &vbo);
 	}
 	//glDeleteProgram(shader_program);
+}
+
+void ESP::draw_boxes(size_t current_entities, std::array<Entity, 32> entities)
+{
+	for (size_t i{}; i < current_entities; ++i)
+	{
+		if (!entities[i].isAlive())
+			continue;
+
+		Vector2 screen_coords;
+		Vector2 bottom_coords;
+
+		if (!Maths::world_to_screen(entities[i].m_head_coords, screen_coords, matrix, screen_width, screen_height))
+			continue;
+		if (!Maths::world_to_screen(entities[i].m_coords, bottom_coords, matrix, screen_width, screen_height))
+			continue;
+
+		float box[]
+		{
+			screen_coords.x - 0.05f, screen_coords.y, 0.0f,
+			screen_coords.x + 0.05f, screen_coords.y, 0.0f,
+
+			screen_coords.x - 0.05f, screen_coords.y, 0.0f,
+			screen_coords.x - 0.05f, bottom_coords.y, 0.0f,
+
+			screen_coords.x + 0.05f, screen_coords.y, 0.0f,
+			screen_coords.x + 0.05f, bottom_coords.y, 0.0f,
+
+			screen_coords.x - 0.05f, bottom_coords.y, 0.0f,
+			screen_coords.x + 0.05f, bottom_coords.y, 0.0f,
+
+
+		};
+
+		unsigned int vao{}, vbo{};
+
+		glGenVertexArrays(1, &vao);
+		glGenBuffers(1, &vbo);
+
+		glBindVertexArray(vao);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(box), box, GL_DYNAMIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+		glEnableVertexAttribArray(0);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawArrays(GL_LINES, 0, 8);
+
+
+		glDeleteVertexArrays(1, &vao);
+		glDeleteBuffers(1, &vbo);
+	}
 }

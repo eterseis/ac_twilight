@@ -28,8 +28,6 @@ void update_local_player(Entity& myself)
 	myself.m_address = offsets::get_local_player();
 	myself.vf_table = mem.Read<uintptr_t>(myself.m_address);
 
-	mem.ReadString(myself.m_address + offsets::name, myself.m_name, entity_name_length);
-
 	myself.m_coords.x = mem.Read<float>(myself.m_address + offsets::x_feet_coord);
 	myself.m_coords.y = mem.Read<float>(myself.m_address + offsets::y_feet_coord);
 	myself.m_coords.z = mem.Read<float>(myself.m_address + offsets::z_feet_coord);
