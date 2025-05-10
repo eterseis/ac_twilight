@@ -1,5 +1,7 @@
 #include <iostream>
 #include <array>
+#include <thread>
+#include <chrono>
 #include "memory.h"
 #include "constants.h"
 #include "offsets.h"
@@ -16,47 +18,67 @@
 //#include "imgui_impl_opengl3.h"
 
 
+namespace Options
+{
+	//miscellaneous
+	bool b_enable_unlimited_health{};
+	bool b_enable_unlimited_ammo{};
+	bool b_enable_rapidfire{};
 
-bool enable_debug{};
-bool enable_aimbot{};
-bool enable_lines{};
+	//debug
+	bool b_enable_debug{};
 
+	//aimbot
+	bool b_enable_aimbot{};
+
+	//esp
+	bool b_enable_snaplines{};
+
+}
+using namespace std::chrono_literals;
+
+Entity myself;
 Miscellaneous misc{};
+
 std::array<Entity, 32> entities{};
-//Entity entities[32];
+size_t current_entities;
 
 void handle_input()
 {
-	if (GetAsyncKeyState(VK_INSERT) & 1)
+	while (1)
 	{
-		misc.m_health = !misc.m_health;
-	}
-	if (GetAsyncKeyState(VK_DELETE) & 1)
-	{
-		misc.m_ammo = !misc.m_ammo;
-	}
-	if (GetAsyncKeyState(VK_DOWN) & 1)
-	{
-		misc.m_rapidfire = !misc.m_rapidfire;
-	}
-	if (GetAsyncKeyState(VK_UP) & 1)
-	{
-		enable_aimbot = !enable_aimbot;
-	}
-	if (GetAsyncKeyState(VK_F9) & 1)
-	{
-		enable_debug = !enable_debug;
-	}
-	if (GetAsyncKeyState(VK_RCONTROL) & 1)
-	{
-		enable_lines = !enable_lines;
+		if (GetAsyncKeyState(VK_INSERT) & 1)
+		{
+			Options::b_enable_unlimited_health = !Options::b_enable_unlimited_health;
+		}
+		if (GetAsyncKeyState(VK_DELETE) & 1)
+		{
+			Options::b_enable_unlimited_ammo = !Options::b_enable_unlimited_ammo;
+		}
+		if (GetAsyncKeyState(VK_DOWN) & 1)
+		{
+			Options::b_enable_rapidfire = !Options::b_enable_rapidfire;
+		}
+		if (GetAsyncKeyState(VK_UP) & 1)
+		{
+			Options::b_enable_aimbot = !Options::b_enable_aimbot;
+		}
+		if (GetAsyncKeyState(VK_F9) & 1)
+		{
+			Options::b_enable_debug = !Options::b_enable_debug;
+		}
+		if (GetAsyncKeyState(VK_RCONTROL) & 1)
+		{
+			Options::b_enable_snaplines = !Options::b_enable_snaplines;
+		}
+		std::this_thread::sleep_for(std::chrono::microseconds(5));
 	}
 }
 
-void debug_mode(const size_t& current_entities)
+void debug_mode(const size_t& current_entitiess)
 {
 	std::cout << "---DEBUG MODE---\n\n";
-	for (size_t i{}; i < current_entities; ++i)
+	for (size_t i{}; i < current_entitiess; ++i)
 	{
 		std::cout << std::hex;
 		std::cout << "address: 0x" << entities[i].m_address << "\n";
@@ -77,6 +99,44 @@ void debug_mode(const size_t& current_entities)
 	Sleep(10);
 	system("cls");
 
+}
+
+void miscellaneous()
+{
+	while (1)
+	{
+		if (myself.vf_table == offsets::vf_table_player)
+		{
+			if (Options::b_enable_unlimited_health)
+			{
+				misc.unlimited_health(myself.m_address);
+			}
+			if (Options::b_enable_unlimited_ammo)
+			{
+				misc.unlimited_ammo(myself.m_address);
+			}
+			if (Options::b_enable_rapidfire)
+			{
+				misc.rapidfire(myself.m_address);
+			}
+		}
+		std::this_thread::sleep_for(std::chrono::microseconds(5));
+	}
+}
+
+void aimbot()
+{
+	while (1)
+	{
+		if (myself.vf_table == offsets::vf_table_player)
+		{
+			if (Options::b_enable_aimbot)
+			{
+				Aimbot::closest_target(get_closest_entity(entities, current_entities), myself);
+			}
+		}
+		std::this_thread::sleep_for(std::chrono::microseconds(5));
+	}
 }
 
 int main()
@@ -102,7 +162,7 @@ int main()
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	//glfwSwapInterval(1);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -110,15 +170,15 @@ int main()
 		return -1;
 	}
 
-	Entity myself;
-	size_t current_entities;
 
 	ESP visuals;
 
+	std::thread thread_handle_input(handle_input);
+	std::thread thread_misc(miscellaneous);
+	std::thread thread_aimbot(aimbot);
+
 	while (!glfwWindowShouldClose(window))
 	{
-		handle_input();
-
 		current_entities = offsets::get_max_entities() - 1 /*except me*/;
 		update_local_player(myself);
 
@@ -128,34 +188,13 @@ int main()
 			Maths::bubble_sort(entities, current_entities);
 		}
 
-		if (misc.m_health)
-		{
-			misc.unlimited_health(myself.m_address);
-		}
-		if (misc.m_ammo)
-		{
-			misc.unlimited_ammo(myself.m_address);
-		}
-		if (misc.m_rapidfire)
-		{
-			misc.rapidfire(myself.m_address);
-		}
-		if (enable_debug)
-		{
-			debug_mode(current_entities);
-		}
-		if (enable_aimbot)
-		{
-			Aimbot::closest_target(get_closest_entity(entities, current_entities), myself);
-		}
-
 		//RENDERING
 		int display_w, display_h;
 		glfwGetFramebufferSize(window, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		if (enable_lines)
+		if (Options::b_enable_snaplines)
 		{
 			visuals.matrix = offsets::get_view_matrix();
 			visuals.draw_lines(current_entities, entities);
