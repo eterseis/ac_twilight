@@ -1,7 +1,7 @@
 #include "memory.h"
 
 //sets m_procId and m_hProcess
-Memory::Memory(const wchar_t* procName)
+Memory::Memory(const char* procName)
 {
 	HANDLE hSnap(CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0));
 
@@ -11,7 +11,7 @@ Memory::Memory(const wchar_t* procName)
 	{
 		do
 		{
-			if (!_wcsicmp(procEntry.szExeFile, procName))
+			if (!_stricmp(procEntry.szExeFile, procName))
 			{
 				m_procId = procEntry.th32ProcessID;
 				break;
@@ -23,7 +23,7 @@ Memory::Memory(const wchar_t* procName)
 	m_hProcess = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ, false, m_procId);
 }
 
-const uintptr_t Memory::GetModuleBaseAddress(const wchar_t* procName) const
+const uintptr_t Memory::GetModuleBaseAddress(const char* procName) const
 {
 	uintptr_t modBaseAddr{};
 	HANDLE hSnap{ CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, m_procId) };
@@ -35,7 +35,7 @@ const uintptr_t Memory::GetModuleBaseAddress(const wchar_t* procName) const
 	{
 		do
 		{
-			if (!_wcsicmp(modEntry.szModule, procName))
+			if (!_stricmp(modEntry.szModule, procName))
 			{
 				modBaseAddr = reinterpret_cast<uintptr_t>(modEntry.modBaseAddr);
 				break;

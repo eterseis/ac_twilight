@@ -8,13 +8,13 @@
 class Memory
 {
 public:
-	Memory(const wchar_t* proc); //gets and sets the process id to m_procId
+	Memory(const char* proc); //gets and sets the process id to m_procId
 	~Memory()
 	{
 		CloseHandle(m_hProcess);
 	}
 public:
-	const uintptr_t GetModuleBaseAddress(const wchar_t* proc) const;
+	const uintptr_t GetModuleBaseAddress(const char* proc) const;
 
 	template <typename T>
 	constexpr T Read(const uintptr_t& address) const

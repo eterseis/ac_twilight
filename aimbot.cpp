@@ -6,7 +6,7 @@
 
 void Aimbot::closest_target(Entity& target, Entity& local_player)
 {
-	if (!target.isAlive() && target.vf_table != offsets::vf_table_bot)
+	if (!target.isAlive())
 		return;
 
 	constexpr float pi{ 3.14159265358979323846f };

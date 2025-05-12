@@ -82,28 +82,33 @@ void handle_input()
 
 void debug_mode()
 {
-	std::cout << "---DEBUG MODE---\n\n";
-	for (size_t i{}; i < current_entities; ++i)
+	while (1)
 	{
-		std::cout << std::hex;
-		std::cout << "address: 0x" << entities[i].m_address << "\n";
-		std::cout << "vTable: 0x" << entities[i].vf_table << "\n";
-		std::cout << std::dec;
-		std::cout << "name: " << entities[i].m_name << "\n";
-		std::cout << "health: " << entities[i].m_health << "\n";
-		std::cout << "is alive: " << entities[i].isAlive() << "\n";
-		std::cout << "team: " << entities[i].m_team << "\n";
+		if (Options::b_enable_debug)
+		{
+			std::cout << "---DEBUG MODE---\n\n";
+			for (size_t i{}; i < current_entities; ++i)
+			{
+				std::cout << std::hex;
+				std::cout << "address: 0x" << entities[i].m_address << "\n";
+				std::cout << "vTable: 0x" << entities[i].vf_table << "\n";
+				std::cout << std::dec;
+				std::cout << "name: " << entities[i].m_name << "\n";
+				std::cout << "health: " << entities[i].m_health << "\n";
+				std::cout << "is alive: " << entities[i].isAlive() << "\n";
+				std::cout << "team: " << entities[i].m_team << "\n";
 
-		std::cout << "coords: (" << entities[i].m_coords.x << ", "
-			<< entities[i].m_coords.y << ", "
-			<< entities[i].m_coords.z << ")\n";
+				std::cout << "coords: (" << entities[i].m_coords.x << ", "
+					<< entities[i].m_coords.y << ", "
+					<< entities[i].m_coords.z << ")\n";
 
-		std::cout << "distance from local player: " << entities[i].m_distance_from_local_player << "\n";
-		std::cout << "---------------------------------------\n";
+				std::cout << "distance from local player: " << entities[i].m_distance_from_local_player << "\n";
+				std::cout << "---------------------------------------\n";
+			}
+			std::this_thread::sleep_for(2ms);
+			system("cls");
+		}
 	}
-	Sleep(10);
-	system("cls");
-
 }
 
 void miscellaneous()
@@ -157,16 +162,40 @@ void populate_and_sort_entities()
 	}
 }
 
+void overlay(GLFWwindow* window)
+{
+	HWND game_window;
+	RECT rect;
+	while (1)
+	{
+		game_window = FindWindowA(nullptr, "AssaultCube");
+		if (!game_window)
+		{
+			std::cout << "failed to get game window handle\n";
+			return;
+		}
+
+		GetWindowRect(game_window, &rect);
+
+		int width = rect.right - rect.left;
+		int height = rect.bottom - rect.top;
+
+		glfwSetWindowPos(window, rect.left, rect.top);
+		glfwSetWindowSize(window, width, height);
+
+		std::this_thread::sleep_for(5ms);
+	}
+}
+
 int main()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
 	glfwWindowHint(GLFW_FLOATING, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GL_TRUE);
 	glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, GL_TRUE);
 	glfwWindowHint(GLFW_DECORATED, FALSE);
@@ -182,17 +211,16 @@ int main()
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cout << "Failed to initialize GLAD\n";
-		return -1;
-	}
-
+	if (glewInit() != GLEW_OK)
+		std::cout << "Failed to initialize GLEW\n";
 
 	ESP visuals;
 
 	std::thread thread_handle_input(handle_input);
 	thread_handle_input.detach();
+
+	std::thread thread_overlay(overlay, window);
+	thread_overlay.detach();
 
 	std::thread thread_misc(miscellaneous);
 	thread_misc.detach();
@@ -202,6 +230,9 @@ int main()
 
 	std::thread thread_populate_and_sort_entities(populate_and_sort_entities);
 	thread_populate_and_sort_entities.detach();
+
+	std::thread thread_debug_mode(debug_mode);
+	thread_debug_mode.detach();
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -217,19 +248,18 @@ int main()
 		if (Options::b_enable_snaplines)
 		{
 			visuals.matrix = offsets::get_view_matrix();
-			visuals.draw_lines(current_entities, entities);
+			visuals.draw_lines(current_entities, entities, myself, display_w, display_h);
 		}
 
 		if (Options::b_enable_triangles)
 		{
 			visuals.matrix = offsets::get_view_matrix();
-			visuals.draw_boxes(current_entities, entities);
+			visuals.draw_boxes(current_entities, entities, myself);
 		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;

@@ -54,9 +54,6 @@
     <ClCompile Include="aimbot.cpp">
       <Filter>Features\aimbot</Filter>
     </ClCompile>
-    <ClCompile Include="glad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Dependencies\imgui\imgui.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>

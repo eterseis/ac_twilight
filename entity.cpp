@@ -66,5 +66,5 @@ Entity& get_closest_entity(std::array<Entity, 32>& entities, const size_t& curre
 
 		return entities[i];
 	}
-	return entities[current_entities + 1];
+	return entities[0];
 }
