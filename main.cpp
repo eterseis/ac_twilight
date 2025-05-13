@@ -135,22 +135,7 @@ void miscellaneous()
 	}
 }
 
-void aimbot()
-{
-	while (1)
-	{
-		if (myself.vf_table == offsets::vf_table_player)
-		{
-			if (Options::b_enable_aimbot)
-			{
-				Aimbot::closest_target(get_closest_entity(entities, current_entities), myself);
-			}
-		}
-		std::this_thread::sleep_for(2ms);
-	}
-}
-
-void populate_and_sort_entities()
+void aimbot_and_populate_sort()
 {
 	while (1)
 	{
@@ -158,6 +143,11 @@ void populate_and_sort_entities()
 		{
 			populate_entity_array(entities, myself, current_entities);
 			Maths::bubble_sort(entities, current_entities);
+
+			if (Options::b_enable_aimbot)
+			{
+				Aimbot::closest_target(get_closest_entity(entities, current_entities), myself);
+			}
 		}
 		std::this_thread::sleep_for(5ms);
 	}
@@ -195,6 +185,7 @@ void helper()
 		current_entities = offsets::get_max_entities() - 1 /*except me*/;
 		update_local_player(myself);
 		visuals.matrix = offsets::get_view_matrix();
+
 		std::this_thread::sleep_for(5ms);
 	}
 }
@@ -236,11 +227,8 @@ int main()
 	std::thread thread_misc(miscellaneous);
 	thread_misc.detach();
 
-	std::thread thread_aimbot(aimbot);
-	thread_aimbot.detach();
-
-	std::thread thread_populate_and_sort_entities(populate_and_sort_entities);
-	thread_populate_and_sort_entities.detach();
+	std::thread thread_aimbot_and_populate_and_sort(aimbot_and_populate_sort);
+	thread_aimbot_and_populate_and_sort.detach();
 
 	std::thread thread_debug_mode(debug_mode);
 	thread_debug_mode.detach();
