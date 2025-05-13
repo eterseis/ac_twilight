@@ -40,6 +40,7 @@ using namespace std::chrono_literals;
 
 Entity myself;
 Miscellaneous misc{};
+ESP visuals;
 
 std::array<Entity, 32> entities{};
 size_t current_entities;
@@ -187,6 +188,17 @@ void overlay(GLFWwindow* window)
 	}
 }
 
+void helper()
+{
+	while (1)
+	{
+		current_entities = offsets::get_max_entities() - 1 /*except me*/;
+		update_local_player(myself);
+		visuals.matrix = offsets::get_view_matrix();
+		std::this_thread::sleep_for(5ms);
+	}
+}
+
 int main()
 {
 	glfwInit();
@@ -214,7 +226,6 @@ int main()
 	if (glewInit() != GLEW_OK)
 		std::cout << "Failed to initialize GLEW\n";
 
-	ESP visuals;
 
 	std::thread thread_handle_input(handle_input);
 	thread_handle_input.detach();
@@ -234,11 +245,11 @@ int main()
 	std::thread thread_debug_mode(debug_mode);
 	thread_debug_mode.detach();
 
+	std::thread thread_helper(helper);
+	thread_helper.detach();
+
 	while (!glfwWindowShouldClose(window))
 	{
-		current_entities = offsets::get_max_entities() - 1 /*except me*/;
-		update_local_player(myself);
-
 		//RENDERING
 		int display_w, display_h;
 		glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -247,14 +258,12 @@ int main()
 
 		if (Options::b_enable_snaplines)
 		{
-			visuals.matrix = offsets::get_view_matrix();
 			visuals.draw_lines(current_entities, entities, myself, display_w, display_h);
 		}
 
 		if (Options::b_enable_triangles)
 		{
-			visuals.matrix = offsets::get_view_matrix();
-			visuals.draw_boxes(current_entities, entities, myself);
+			visuals.draw_boxes(current_entities, entities, myself, display_w, display_h);
 		}
 
 		glfwSwapBuffers(window);
