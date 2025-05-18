@@ -3,7 +3,6 @@
 #include <thread>
 #include <chrono>
 #include "memory.h"
-#include "constants.h"
 #include "offsets.h"
 #include "miscellaneous.h"
 #include "entity.h"
@@ -47,7 +46,7 @@ size_t current_entities;
 
 void handle_input()
 {
-	while (1)
+	while (true)
 	{
 		if (GetAsyncKeyState(VK_INSERT) & 1)
 		{
@@ -83,7 +82,7 @@ void handle_input()
 
 void debug_mode()
 {
-	while (1)
+	while (true)
 	{
 		if (Options::b_enable_debug)
 		{
@@ -114,7 +113,7 @@ void debug_mode()
 
 void miscellaneous()
 {
-	while (1)
+	while (true)
 	{
 		if (myself.vf_table == offsets::vf_table_player)
 		{
@@ -135,9 +134,10 @@ void miscellaneous()
 	}
 }
 
+
 void aimbot_and_populate_sort()
 {
-	while (1)
+	while (true)
 	{
 		if (current_entities > 0)
 		{
@@ -155,11 +155,10 @@ void aimbot_and_populate_sort()
 
 void overlay(GLFWwindow* window)
 {
-	HWND game_window;
 	RECT rect;
-	while (1)
+	while (true)
 	{
-		game_window = FindWindowA(nullptr, "AssaultCube");
+		HWND game_window = FindWindowA(nullptr, "AssaultCube");
 		if (!game_window)
 		{
 			std::cout << "failed to get game window handle\n";
@@ -178,9 +177,10 @@ void overlay(GLFWwindow* window)
 	}
 }
 
+
 void helper()
 {
-	while (1)
+	while (true)
 	{
 		current_entities = offsets::get_max_entities() - 1 /*except me*/;
 		update_local_player(myself);
@@ -252,6 +252,7 @@ int main()
 		if (Options::b_enable_triangles)
 		{
 			visuals.draw_boxes(current_entities, entities, myself, display_w, display_h);
+			visuals.draw_health(current_entities, entities, display_w, display_h);
 		}
 
 		glfwSwapBuffers(window);

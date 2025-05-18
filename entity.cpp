@@ -36,6 +36,8 @@ void update_local_player(Entity& myself)
 	myself.m_head_coords.y = mem.Read<float>(myself.m_address + offsets::y_head_coord);
 	myself.m_head_coords.z = mem.Read<float>(myself.m_address + offsets::z_head_coord);
 
+	myself.m_team = mem.Read<int>(myself.m_address + offsets::team);
+
 }
 
 void populate_entity_array(std::array<Entity, 32>& entities, const Entity& myself, const size_t& current_entities)
