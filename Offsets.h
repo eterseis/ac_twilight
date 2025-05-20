@@ -32,6 +32,8 @@ namespace offsets
 	inline constexpr uintptr_t vf_table_bot{ 0x54D07C };
 	inline constexpr uintptr_t vf_table_player{ 0x54D0A4 };
 
+	inline constexpr uintptr_t game_resolution{ 0x191ED8 };
+
 	uintptr_t get_local_player();
 	uintptr_t get_entity_list();
 	size_t get_max_entities();

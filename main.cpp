@@ -32,7 +32,8 @@ namespace Options
 
 	//esp
 	bool b_enable_snaplines{};
-	bool b_enable_triangles{};
+	bool b_enable_rect{};
+	bool b_enable_health_esp{};
 
 }
 using namespace std::chrono_literals;
@@ -68,13 +69,17 @@ void handle_input()
 		{
 			Options::b_enable_debug = !Options::b_enable_debug;
 		}
-		if (GetAsyncKeyState(VK_RCONTROL) & 1)
+		if (GetAsyncKeyState(VK_NUMPAD1) & 1)
 		{
 			Options::b_enable_snaplines = !Options::b_enable_snaplines;
 		}
-		if (GetAsyncKeyState(VK_TAB) & 1)
+		if (GetAsyncKeyState(VK_NUMPAD2) & 1)
 		{
-			Options::b_enable_triangles = !Options::b_enable_triangles;
+			Options::b_enable_rect = !Options::b_enable_rect;
+		}
+		if (GetAsyncKeyState(VK_NUMPAD3) & 1)
+		{
+			Options::b_enable_health_esp = !Options::b_enable_health_esp;
 		}
 		std::this_thread::sleep_for(std::chrono::microseconds(5));
 	}
@@ -155,7 +160,6 @@ void aimbot_and_populate_sort()
 
 void overlay(GLFWwindow* window)
 {
-	RECT rect;
 	while (true)
 	{
 		HWND game_window = FindWindowA(nullptr, "AssaultCube");
@@ -165,18 +169,21 @@ void overlay(GLFWwindow* window)
 			return;
 		}
 
-		GetWindowRect(game_window, &rect);
+		WINDOWINFO info;
+		info.cbSize = sizeof(WINDOWINFO);
 
-		int width = rect.right - rect.left;
-		int height = rect.bottom - rect.top;
+		GetWindowInfo(game_window, &info);
 
-		glfwSetWindowPos(window, rect.left, rect.top);
+
+		int width = mem.Read<int>(moduleBase + offsets::game_resolution);
+		int height = mem.Read<int>(moduleBase + offsets::game_resolution + 0x4);
+
 		glfwSetWindowSize(window, width, height);
+		glfwSetWindowPos(window, info.rcClient.left, info.rcClient.top);
 
 		std::this_thread::sleep_for(5ms);
 	}
 }
-
 
 void helper()
 {
@@ -217,7 +224,6 @@ int main()
 	if (glewInit() != GLEW_OK)
 		std::cout << "Failed to initialize GLEW\n";
 
-
 	std::thread thread_handle_input(handle_input);
 	thread_handle_input.detach();
 
@@ -249,9 +255,13 @@ int main()
 			visuals.draw_lines(current_entities, entities, myself, display_w, display_h);
 		}
 
-		if (Options::b_enable_triangles)
+		if (Options::b_enable_rect)
 		{
-			visuals.draw_boxes(current_entities, entities, myself, display_w, display_h);
+			visuals.draw_rect(current_entities, entities, myself, display_w, display_h);
+		}
+
+		if (Options::b_enable_health_esp)
+		{
 			visuals.draw_health(current_entities, entities, display_w, display_h);
 		}
 
