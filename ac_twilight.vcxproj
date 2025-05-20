@@ -175,6 +175,8 @@
     <ClInclude Include="aimbot.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="GLCommon.h" />
+    <ClInclude Include="globals.h" />
+    <ClInclude Include="settings.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="Dependencies\imgui\imconfig.h" />
     <ClInclude Include="Dependencies\imgui\imgui.h" />

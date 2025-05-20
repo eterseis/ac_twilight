@@ -10,6 +10,7 @@
 #include "vector.h"
 #include "aimbot.h"
 #include "esp.h"
+#include "globals.h"
 
 #include "GLCommon.h"
 //#include "imgui.h"
@@ -32,18 +33,20 @@ namespace Options
 
 	//esp
 	bool b_enable_snaplines{};
-	bool b_enable_rect{};
+	bool b_enable_outlined_snaplines{};
+
 	bool b_enable_health_esp{};
+	bool b_enable_outlined_health{};
+
+	bool b_enable_rect{};
+	bool b_enable_outlined_esp{};
+	bool b_enable_filled_rect{};
 
 }
 using namespace std::chrono_literals;
 
-Entity myself;
-Miscellaneous misc{};
+Miscellaneous misc;
 ESP visuals;
-
-std::array<Entity, 32> entities{};
-size_t current_entities;
 
 void handle_input()
 {
@@ -80,6 +83,22 @@ void handle_input()
 		if (GetAsyncKeyState(VK_NUMPAD3) & 1)
 		{
 			Options::b_enable_health_esp = !Options::b_enable_health_esp;
+		}
+		if (GetAsyncKeyState(VK_NUMPAD0) & 1)
+		{
+			Options::b_enable_outlined_esp = !Options::b_enable_outlined_esp;
+		}
+		if (GetAsyncKeyState(VK_NUMPAD4) & 1)
+		{
+			Options::b_enable_filled_rect = !Options::b_enable_filled_rect;
+		}
+		if (GetAsyncKeyState(VK_NUMPAD5) & 1)
+		{
+			Options::b_enable_outlined_snaplines = !Options::b_enable_outlined_snaplines;
+		}
+		if (GetAsyncKeyState(VK_NUMPAD6) & 1)
+		{
+			Options::b_enable_outlined_health = !Options::b_enable_outlined_health;
 		}
 		std::this_thread::sleep_for(std::chrono::microseconds(5));
 	}
@@ -245,6 +264,8 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		//RENDERING
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
 		int display_w, display_h;
 		glfwGetFramebufferSize(window, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
@@ -252,17 +273,17 @@ int main()
 
 		if (Options::b_enable_snaplines)
 		{
-			visuals.draw_lines(current_entities, entities, myself, display_w, display_h);
+			visuals.snaplines(Options::b_enable_outlined_snaplines, display_w, display_h);
 		}
 
 		if (Options::b_enable_rect)
 		{
-			visuals.draw_rect(current_entities, entities, myself, display_w, display_h);
+			visuals.bounding_box(Options::b_enable_outlined_esp, Options::b_enable_filled_rect, display_w, display_h);
 		}
 
 		if (Options::b_enable_health_esp)
 		{
-			visuals.draw_health(current_entities, entities, display_w, display_h);
+			visuals.health(Options::b_enable_outlined_health, display_w, display_h);
 		}
 
 		glfwSwapBuffers(window);

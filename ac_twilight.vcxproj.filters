@@ -31,6 +31,9 @@
     <Filter Include="Source Files\imgui">
       <UniqueIdentifier>{ee7b3b0f-238c-402a-8972-134f215edcd0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Globals">
+      <UniqueIdentifier>{91422fa5-66df-4dd9-b858-32845cc8d863}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -136,6 +139,12 @@
     </ClInclude>
     <ClInclude Include="GLCommon.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="globals.h">
+      <Filter>Header Files\Globals</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>Header Files\Globals</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
