@@ -13,9 +13,9 @@
 #include "globals.h"
 
 #include "GLCommon.h"
-//#include "imgui.h"
-//#include "imgui_impl_glfw.h"
-//#include "imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 
 namespace Options
@@ -42,17 +42,54 @@ namespace Options
 	bool b_enable_outlined_esp{};
 	bool b_enable_filled_rect{};
 
+	//imgui
+	bool b_enable_menu{};
 }
 using namespace std::chrono_literals;
 
 Miscellaneous misc;
 ESP visuals;
 
-void handle_input()
+void hide_menu(GLFWwindow* window)
+{
+	glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, GL_TRUE);
+	HWND ac_window = FindWindowA(nullptr, "AssaultCube");
+	if (!ac_window)
+	{
+		std::cout << "failed to hide window\n";
+		return;
+	}
+	EnableWindow(ac_window, true);
+	SetForegroundWindow(ac_window);
+	SetActiveWindow(ac_window);
+	UpdateWindow(ac_window);
+}
+
+void show_menu(GLFWwindow* window)
+{
+	glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, GL_FALSE);
+	HWND ac_window = FindWindowA(nullptr, "AssaultCube");
+	if (!ac_window)
+	{
+		std::cout << "failed to show window\n";
+		return;
+	}
+	EnableWindow(ac_window, false);
+	UpdateWindow(ac_window);
+	glfwFocusWindow(window);
+}
+
+void handle_input(GLFWwindow* window)
 {
 	while (true)
 	{
 		if (GetAsyncKeyState(VK_INSERT) & 1)
+		{
+			Options::b_enable_menu = !Options::b_enable_menu;
+
+			Options::b_enable_menu ? show_menu(window) : hide_menu(window);
+		}
+		if (GetAsyncKeyState(VK_HOME) & 1)
 		{
 			Options::b_enable_unlimited_health = !Options::b_enable_unlimited_health;
 		}
@@ -158,7 +195,6 @@ void miscellaneous()
 	}
 }
 
-
 void aimbot_and_populate_sort()
 {
 	while (true)
@@ -182,11 +218,7 @@ void overlay(GLFWwindow* window)
 	while (true)
 	{
 		HWND game_window = FindWindowA(nullptr, "AssaultCube");
-		if (!game_window)
-		{
-			std::cout << "failed to get game window handle\n";
-			return;
-		}
+		if (!game_window) continue;
 
 		WINDOWINFO info;
 		info.cbSize = sizeof(WINDOWINFO);
@@ -219,6 +251,7 @@ void helper()
 int main()
 {
 	glfwInit();
+	constexpr char glsl_version[]{ "#version 130" };
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
@@ -243,27 +276,63 @@ int main()
 	if (glewInit() != GLEW_OK)
 		std::cout << "Failed to initialize GLEW\n";
 
-	std::thread thread_handle_input(handle_input);
-	thread_handle_input.detach();
+	{
+		std::thread thread_handle_input(handle_input, window);
+		thread_handle_input.detach();
 
-	std::thread thread_overlay(overlay, window);
-	thread_overlay.detach();
+		std::thread thread_overlay(overlay, window);
+		thread_overlay.detach();
 
-	std::thread thread_misc(miscellaneous);
-	thread_misc.detach();
+		std::thread thread_misc(miscellaneous);
+		thread_misc.detach();
 
-	std::thread thread_aimbot_and_populate_and_sort(aimbot_and_populate_sort);
-	thread_aimbot_and_populate_and_sort.detach();
+		std::thread thread_aimbot_and_populate_and_sort(aimbot_and_populate_sort);
+		thread_aimbot_and_populate_and_sort.detach();
 
-	std::thread thread_debug_mode(debug_mode);
-	thread_debug_mode.detach();
+		std::thread thread_debug_mode(debug_mode);
+		thread_debug_mode.detach();
 
-	std::thread thread_helper(helper);
-	thread_helper.detach();
+		std::thread thread_helper(helper);
+		thread_helper.detach();
+	}
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
 
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init(glsl_version);
+
+	int width;
+	int height;
+
+	bool checkbox{};
 	while (!glfwWindowShouldClose(window))
 	{
+		glfwGetWindowSize(window, &width, &height);
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		if (Options::b_enable_menu)
+		{
+			ImGui::SetNextWindowSize(ImVec2(width * 0.3f, height * 0.3f));
+
+			ImGui::Begin("Key Of The Twilight", nullptr, ImGuiWindowFlags_NoTitleBar);
+			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize("key of the twilight").x / 2);
+
+			ImGui::Text("Key Of The Twilight");
+			ImGui::Checkbox("Drinker", &checkbox);
+			//ImGui::InputText("#key", )
+			ImGui::SetCursorPosY(ImGui::GetWindowHeight() * 0.9f);
+			ImGui::Text("Framerate: %.2f", io.Framerate);
+			ImGui::End();
+		}
+
 		//RENDERING
+		ImGui::Render();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 		int display_w, display_h;
@@ -286,9 +355,15 @@ int main()
 			visuals.health(Options::b_enable_outlined_health, display_w, display_h);
 		}
 
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;

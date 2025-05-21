@@ -18,7 +18,7 @@ void update_entity_info(Entity& e, const Entity& myself)
 
 	e.m_head_coords.x = mem.Read<float>(e.m_address + offsets::x_head_coord);
 	e.m_head_coords.y = mem.Read<float>(e.m_address + offsets::y_head_coord);
-	e.m_head_coords.z = mem.Read<float>(e.m_address + offsets::z_head_coord);
+	e.m_head_coords.z = mem.Read<float>(e.m_address + offsets::z_head_coord) + 1.0f;
 
 	e.m_distance_from_local_player = Maths::distance_from_me(e, myself);
 }
