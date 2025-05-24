@@ -1,9 +1,9 @@
 #pragma once
 #include <cstdint>
-#include "vector.h"
-#include "constants.h"
 #include <array>
+#include "vector.h"
 
+inline constexpr int entity_name_length{ 16 };
 class Entity
 {
 public:
@@ -19,7 +19,7 @@ public:
 	float m_distance_from_local_player;
 };
 
-void update_entity_info(Entity& e, Entity& myself);
-void update_local_player(Entity& myself);
-void populate_entity_array(std::array<Entity, 32>& entities, const Entity& myself, const size_t& current_entities);
-Entity& get_closest_entity(std::array<Entity, 32>& entities, const size_t& current_entities);
+void update_entity_info(Entity& e);
+void update_local_player();
+void populate_entity_array(std::array<Entity, 32>& entities, const size_t& current_entities);
+Entity& get_closest_entity(bool ignore_teammates, std::array<Entity, 32>& entities, const size_t& current_entities);

@@ -1,7 +1,9 @@
 #pragma once
-#include "entity.h"
+#include <cmath>
+#include "globals.h"
+#include "offsets.h"
 
 namespace Aimbot
 {
-	void closest_target(Entity& target, Entity& local_palyer);
+	void closest_target(bool ignore_temmates, Entity& target, Entity& local_palyer);
 }

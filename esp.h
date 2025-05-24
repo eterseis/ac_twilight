@@ -3,7 +3,7 @@
 #include <array>
 #include "vector.h"
 #include "offsets.h"
-#include "constants.h"
+#include "globals.h"
 #include "entity.h"
 #include "maths.h"
 #include "vector.h"
@@ -21,9 +21,9 @@ public:
 	void draw_rect(bool outlined, float x, float x2, float y, float y2, float w, Vector3 color);
 	void draw_filled_rect(bool outlined, float x, float x2, float y, float y2, float w, Vector3 color);
 	void draw_lines(float thickness, bool outlined, float x, float x2, float y, float y2, float w, Vector3 color);
-	void snaplines(bool outlined, int display_w, int display_h);
-	void bounding_box(bool outlined, bool filled, int display_w, int display_h);
-	void health(bool outlined, int display_w, int display_h);
+	void snaplines(bool ignore_teammates, bool outlined, int display_w, int display_h);
+	void bounding_box(bool ignore_teammates, bool outlined, bool filled, int display_w, int display_h);
+	void health(bool ignore_teammates, bool outlined, int display_w, int display_h);
 
 public:
 	std::array<float, 16> matrix;

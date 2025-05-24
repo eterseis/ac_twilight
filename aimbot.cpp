@@ -1,11 +1,8 @@
-#include <cmath>
 #include "aimbot.h"
-#include "memory.h"
-#include "constants.h"
-#include "offsets.h"
 
-void Aimbot::closest_target(Entity& target, Entity& local_player)
+void Aimbot::closest_target(bool ignore_teammates, Entity& target, Entity& local_player)
 {
+	if (ignore_teammates && target.m_team == local_player.m_team) return;
 	if (!target.isAlive())
 		return;
 
@@ -13,7 +10,7 @@ void Aimbot::closest_target(Entity& target, Entity& local_player)
 
 	float abspos_x = target.m_head_coords.x - local_player.m_head_coords.x;
 	float abspos_y = target.m_head_coords.y - local_player.m_head_coords.y;
-	float abspos_z = target.m_head_coords.z - 1.0f - local_player.m_head_coords.z;
+	float abspos_z = target.m_head_coords.z - local_player.m_head_coords.z;
 
 	float azimuth_xy = atan2f(abspos_y, abspos_x);
 	float azimuth_z = atan2f(abspos_z, target.m_distance_from_local_player);
@@ -23,6 +20,6 @@ void Aimbot::closest_target(Entity& target, Entity& local_player)
 
 	float pitch = azimuth_z * (180.0f / pi);
 
-	mem.Write<float>(local_player.m_address + offsets::yaw, yaw);
-	mem.Write<float>(local_player.m_address + offsets::pitch, pitch);
+	Globals::mem.Write<float>(local_player.m_address + offsets::yaw, yaw);
+	Globals::mem.Write<float>(local_player.m_address + offsets::pitch, pitch);
 }

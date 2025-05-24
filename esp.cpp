@@ -1,4 +1,5 @@
 #include "esp.h"
+#include <iostream>
 
 bool ESP::valid_entity(Entity& ent)
 {
@@ -102,45 +103,49 @@ void ESP::draw_lines(float thickness, bool outlined, float x, float x2, float y,
 	glEnd();
 }
 
-void ESP::snaplines(bool outlined, int display_w, int display_h)
+void ESP::snaplines(bool ignore_teammates, bool outlined, int display_w, int display_h)
 {
-	for (size_t i{}; i < current_entities; ++i)
+	for (size_t i{}; i < Globals::current_entities; ++i)
 	{
-		if (!valid_entity(entities[i]))	continue;
+		if (!valid_entity(Globals::entities[i])) continue;
 
-		if (!entities[i].isAlive())	continue;
+		if (ignore_teammates && Globals::entities[i].m_team == Globals::myself.m_team) continue;
+		if (!Globals::entities[i].isAlive()) continue;
 
 		Vector2 bottom_coords;
 
-		if (!Maths::world_to_screen(entities[i].m_coords, bottom_coords, matrix, display_w, display_h)) continue;
+		if (!Maths::world_to_screen(Globals::entities[i].m_coords, bottom_coords, matrix, display_w, display_h)) continue;
 
 		Vector3 color;
-		if (myself.m_team == entities[i].m_team) color = Vector3(1.0f, 1.0f, 1.0f);
+		if (Globals::myself.m_team == Globals::entities[i].m_team) color = Vector3(1.0f, 1.0f, 1.0f);
 		else color = Vector3(1.0f, 0.0f, 0.0f);
 
 		draw_lines(1.0f, outlined, origin_bottom.x, bottom_coords.x, origin_bottom.y, bottom_coords.y, 0.0f, color);
 	}
 }
 
-void ESP::bounding_box(bool outlined, bool filled, int display_w, int display_h)
+void ESP::bounding_box(bool ignore_teammates, bool outlined, bool filled, int display_w, int display_h)
 {
-	for (size_t i{}; i < current_entities; ++i)
+	for (size_t i{}; i < Globals::current_entities; ++i)
 	{
-		if (!valid_entity(entities[i]))	continue;
+		if (!valid_entity(Globals::entities[i]))	continue;
 
-		if (!entities[i].isAlive())	continue;
+		if (ignore_teammates && Globals::entities[i].m_team == Globals::myself.m_team) continue;
+		if (!Globals::entities[i].isAlive())	continue;
+
+		Vector3 bot_head{ Globals::entities[i].m_head_coords.x, Globals::entities[i].m_head_coords.y, Globals::entities[i].m_head_coords.z + 0.8f };
 
 		Vector2 bottom_coords;
 		Vector2 top_coords;
 
-		if (!Maths::world_to_screen(entities[i].m_coords, bottom_coords, matrix, display_w, display_h))	continue;
-		if (!Maths::world_to_screen(entities[i].m_head_coords, top_coords, matrix, display_w, display_h))	continue;
+		if (!Maths::world_to_screen(Globals::entities[i].m_coords, bottom_coords, matrix, display_w, display_h))	 continue;
+		if (!Maths::world_to_screen(bot_head, top_coords, matrix, display_w, display_h))	continue;
 
 		float h = top_coords.y - bottom_coords.y;
 		float w = h / 5.0f;
 
 		Vector3 color;
-		if (myself.m_team == entities[i].m_team) color = Vector3{ 1.0f, 1.0f, 1.0f };
+		if (Globals::myself.m_team == Globals::entities[i].m_team) color = Vector3{ 1.0f, 1.0f, 1.0f };
 		else color = Vector3{ 1.0f, 0.0f, 0.0f };
 
 		if (!filled)
@@ -154,25 +159,28 @@ void ESP::bounding_box(bool outlined, bool filled, int display_w, int display_h)
 	}
 }
 
-void ESP::health(bool outlined, int display_w, int display_h)
+void ESP::health(bool ignore_teammates, bool outlined, int display_w, int display_h)
 {
-	for (size_t i{}; i < current_entities; ++i)
+	for (size_t i{}; i < Globals::current_entities; ++i)
 	{
-		if (!valid_entity(entities[i])) continue;
+		if (!valid_entity(Globals::entities[i])) continue;
 
-		if (!entities[i].isAlive())	continue;
+		if (ignore_teammates && Globals::entities[i].m_team == Globals::myself.m_team) continue;
+		if (!Globals::entities[i].isAlive())	continue;
+
+		Vector3 bot_head{ Globals::entities[i].m_head_coords.x, Globals::entities[i].m_head_coords.y, Globals::entities[i].m_head_coords.z + 0.8f };
 
 		Vector2 bottom_coords;
 		Vector2 top_coords;
 
-		if (!Maths::world_to_screen(entities[i].m_coords, bottom_coords, matrix, display_w, display_h))	continue;
-		if (!Maths::world_to_screen(entities[i].m_head_coords, top_coords, matrix, display_w, display_h))	continue;
+		if (!Maths::world_to_screen(Globals::entities[i].m_coords, bottom_coords, matrix, display_w, display_h))	continue;
+		if (!Maths::world_to_screen(bot_head, top_coords, matrix, display_w, display_h))	continue;
 
 		float height = top_coords.y - bottom_coords.y;
 		float width = height / 4.0f;
 
 		//linear interpolation between two points using percentage
-		float t{ 1.0f - ((entities[i].m_health / 100.0f)) };
+		float t{ 1.0f - ((Globals::entities[i].m_health / 100.0f)) };
 		float x = top_coords.x + t * (bottom_coords.x - top_coords.x);
 		float y = top_coords.y + t * (bottom_coords.y - top_coords.y);
 

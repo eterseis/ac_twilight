@@ -2,15 +2,15 @@
 
 void Miscellaneous::unlimited_health(uintptr_t& address)
 {
-	mem.Write<int>(address + offsets::health, 1337);
+	Globals::mem.Write<int>(address + offsets::health, 1337);
 }
 
 void Miscellaneous::unlimited_ammo(uintptr_t& address)
 {
-	mem.Write<int>(address + offsets::ammo, 100);
+	Globals::mem.Write<int>(address + offsets::ammo, 100);
 }
 
-void Miscellaneous::rapidfire(uintptr_t& address)
+void Miscellaneous::rapidfire(uintptr_t& address, int value)
 {
-	mem.Write<int>(address + offsets::firerate, 40);
+	Globals::mem.Write<int>(address + offsets::firerate, value);
 }

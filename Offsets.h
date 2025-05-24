@@ -1,6 +1,6 @@
 #pragma once
 #include "memory.h"
-#include "constants.h"
+#include "globals.h"
 #include <array>
 
 namespace offsets

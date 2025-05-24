@@ -11,40 +11,14 @@
 #include "aimbot.h"
 #include "esp.h"
 #include "globals.h"
+#include "menu.h"
+#include "settings.h"
 
 #include "GLCommon.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-
-namespace Options
-{
-	//miscellaneous
-	bool b_enable_unlimited_health{};
-	bool b_enable_unlimited_ammo{};
-	bool b_enable_rapidfire{};
-
-	//debug
-	bool b_enable_debug{};
-
-	//aimbot
-	bool b_enable_aimbot{};
-
-	//esp
-	bool b_enable_snaplines{};
-	bool b_enable_outlined_snaplines{};
-
-	bool b_enable_health_esp{};
-	bool b_enable_outlined_health{};
-
-	bool b_enable_rect{};
-	bool b_enable_outlined_esp{};
-	bool b_enable_filled_rect{};
-
-	//imgui
-	bool b_enable_menu{};
-}
 using namespace std::chrono_literals;
 
 Miscellaneous misc;
@@ -75,8 +49,8 @@ void show_menu(GLFWwindow* window)
 		return;
 	}
 	EnableWindow(ac_window, false);
-	UpdateWindow(ac_window);
 	glfwFocusWindow(window);
+	UpdateWindow(ac_window);
 }
 
 void handle_input(GLFWwindow* window)
@@ -85,90 +59,11 @@ void handle_input(GLFWwindow* window)
 	{
 		if (GetAsyncKeyState(VK_INSERT) & 1)
 		{
-			Options::b_enable_menu = !Options::b_enable_menu;
+			Settings::enable_menu = !Settings::enable_menu;
 
-			Options::b_enable_menu ? show_menu(window) : hide_menu(window);
-		}
-		if (GetAsyncKeyState(VK_HOME) & 1)
-		{
-			Options::b_enable_unlimited_health = !Options::b_enable_unlimited_health;
-		}
-		if (GetAsyncKeyState(VK_DELETE) & 1)
-		{
-			Options::b_enable_unlimited_ammo = !Options::b_enable_unlimited_ammo;
-		}
-		if (GetAsyncKeyState(VK_DOWN) & 1)
-		{
-			Options::b_enable_rapidfire = !Options::b_enable_rapidfire;
-		}
-		if (GetAsyncKeyState(VK_UP) & 1)
-		{
-			Options::b_enable_aimbot = !Options::b_enable_aimbot;
-		}
-		if (GetAsyncKeyState(VK_F9) & 1)
-		{
-			Options::b_enable_debug = !Options::b_enable_debug;
-		}
-		if (GetAsyncKeyState(VK_NUMPAD1) & 1)
-		{
-			Options::b_enable_snaplines = !Options::b_enable_snaplines;
-		}
-		if (GetAsyncKeyState(VK_NUMPAD2) & 1)
-		{
-			Options::b_enable_rect = !Options::b_enable_rect;
-		}
-		if (GetAsyncKeyState(VK_NUMPAD3) & 1)
-		{
-			Options::b_enable_health_esp = !Options::b_enable_health_esp;
-		}
-		if (GetAsyncKeyState(VK_NUMPAD0) & 1)
-		{
-			Options::b_enable_outlined_esp = !Options::b_enable_outlined_esp;
-		}
-		if (GetAsyncKeyState(VK_NUMPAD4) & 1)
-		{
-			Options::b_enable_filled_rect = !Options::b_enable_filled_rect;
-		}
-		if (GetAsyncKeyState(VK_NUMPAD5) & 1)
-		{
-			Options::b_enable_outlined_snaplines = !Options::b_enable_outlined_snaplines;
-		}
-		if (GetAsyncKeyState(VK_NUMPAD6) & 1)
-		{
-			Options::b_enable_outlined_health = !Options::b_enable_outlined_health;
+			Settings::enable_menu ? show_menu(window) : hide_menu(window);
 		}
 		std::this_thread::sleep_for(std::chrono::microseconds(5));
-	}
-}
-
-void debug_mode()
-{
-	while (true)
-	{
-		if (Options::b_enable_debug)
-		{
-			std::cout << "---DEBUG MODE---\n\n";
-			for (size_t i{}; i < current_entities; ++i)
-			{
-				std::cout << std::hex;
-				std::cout << "address: 0x" << entities[i].m_address << "\n";
-				std::cout << "vTable: 0x" << entities[i].vf_table << "\n";
-				std::cout << std::dec;
-				std::cout << "name: " << entities[i].m_name << "\n";
-				std::cout << "health: " << entities[i].m_health << "\n";
-				std::cout << "is alive: " << entities[i].isAlive() << "\n";
-				std::cout << "team: " << entities[i].m_team << "\n";
-
-				std::cout << "coords: (" << entities[i].m_coords.x << ", "
-					<< entities[i].m_coords.y << ", "
-					<< entities[i].m_coords.z << ")\n";
-
-				std::cout << "distance from local player: " << entities[i].m_distance_from_local_player << "\n";
-				std::cout << "---------------------------------------\n";
-			}
-			std::this_thread::sleep_for(2ms);
-			system("cls");
-		}
 	}
 }
 
@@ -176,19 +71,19 @@ void miscellaneous()
 {
 	while (true)
 	{
-		if (myself.vf_table == offsets::vf_table_player)
+		if (Globals::myself.vf_table == offsets::vf_table_player)
 		{
-			if (Options::b_enable_unlimited_health)
+			if (Settings::misc_unlimited_health)
 			{
-				misc.unlimited_health(myself.m_address);
+				misc.unlimited_health(Globals::myself.m_address);
 			}
-			if (Options::b_enable_unlimited_ammo)
+			if (Settings::misc_unlimited_ammo)
 			{
-				misc.unlimited_ammo(myself.m_address);
+				misc.unlimited_ammo(Globals::myself.m_address);
 			}
-			if (Options::b_enable_rapidfire)
+			if (Settings::misc_rapidfire)
 			{
-				misc.rapidfire(myself.m_address);
+				misc.rapidfire(Globals::myself.m_address, Settings::misc_rapidfire_delay);
 			}
 		}
 		std::this_thread::sleep_for(std::chrono::microseconds(5));
@@ -199,17 +94,17 @@ void aimbot_and_populate_sort()
 {
 	while (true)
 	{
-		if (current_entities > 0)
+		if (Globals::current_entities > 0)
 		{
-			populate_entity_array(entities, myself, current_entities);
-			Maths::bubble_sort(entities, current_entities);
+			populate_entity_array(Globals::entities, Globals::current_entities);
+			Maths::bubble_sort(Globals::entities, Globals::current_entities);
 
-			if (Options::b_enable_aimbot)
+			if (Settings::aim_enabled)
 			{
-				Aimbot::closest_target(get_closest_entity(entities, current_entities), myself);
+				Aimbot::closest_target(Settings::aim_ignore_teammates, get_closest_entity(Settings::aim_ignore_teammates, Globals::entities, Globals::current_entities), Globals::myself);
 			}
 		}
-		std::this_thread::sleep_for(5ms);
+		std::this_thread::sleep_for(1ms);
 	}
 }
 
@@ -226,13 +121,13 @@ void overlay(GLFWwindow* window)
 		GetWindowInfo(game_window, &info);
 
 
-		int width = mem.Read<int>(moduleBase + offsets::game_resolution);
-		int height = mem.Read<int>(moduleBase + offsets::game_resolution + 0x4);
+		int width = Globals::mem.Read<int>(Globals::moduleBase + offsets::game_resolution);
+		int height = Globals::mem.Read<int>(Globals::moduleBase + offsets::game_resolution + 0x4);
 
 		glfwSetWindowSize(window, width, height);
 		glfwSetWindowPos(window, info.rcClient.left, info.rcClient.top);
 
-		std::this_thread::sleep_for(5ms);
+		std::this_thread::sleep_for(1ms);
 	}
 }
 
@@ -240,18 +135,18 @@ void helper()
 {
 	while (true)
 	{
-		current_entities = offsets::get_max_entities() - 1 /*except me*/;
-		update_local_player(myself);
+		Globals::current_entities = offsets::get_max_entities() - 1 /*except me*/;
+		update_local_player();
 		visuals.matrix = offsets::get_view_matrix();
 
-		std::this_thread::sleep_for(5ms);
+		std::this_thread::sleep_for(1ms);
 	}
 }
 
 int main()
 {
-	glfwInit();
 	constexpr char glsl_version[]{ "#version 130" };
+	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
@@ -289,25 +184,93 @@ int main()
 		std::thread thread_aimbot_and_populate_and_sort(aimbot_and_populate_sort);
 		thread_aimbot_and_populate_and_sort.detach();
 
-		std::thread thread_debug_mode(debug_mode);
-		thread_debug_mode.detach();
+		/*std::thread thread_debug_mode(debug_mode);
+		thread_debug_mode.detach();*/
 
 		std::thread thread_helper(helper);
 		thread_helper.detach();
 	}
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
+	//ImGuiIO& io = ImGui::GetIO();
 
 	ImGui::StyleColorsDark();
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
+	ImGuiStyle& style{ ImGui::GetStyle() };
+	ImVec4* colors{ style.Colors };
+
 	int width;
 	int height;
+	{
+		colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+		colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+		colors[ImGuiCol_WindowBg] = ImVec4(0.04f, 0.04f, 0.04f, 0.94f);
+		colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+		colors[ImGuiCol_Border] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
+		colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.15f, 0.15f, 0.54f);
+		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.48f, 0.26f, 0.98f, 0.40f);
+		colors[ImGuiCol_FrameBgActive] = ImVec4(0.37f, 0.00f, 1.00f, 1.00f);
+		colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
+		colors[ImGuiCol_TitleBgActive] = ImVec4(0.21f, 0.16f, 0.48f, 1.00f);
+		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+		colors[ImGuiCol_MenuBarBg] = ImVec4(0.11f, 0.11f, 0.11f, 1.00f);
+		colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
+		colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
+		colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+		colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
+		colors[ImGuiCol_CheckMark] = ImVec4(0.45f, 0.26f, 0.98f, 1.00f);
+		colors[ImGuiCol_SliderGrab] = ImVec4(0.41f, 0.00f, 1.00f, 0.40f);
+		colors[ImGuiCol_SliderGrabActive] = ImVec4(0.48f, 0.26f, 0.98f, 0.52f);
+		colors[ImGuiCol_Button] = ImVec4(0.20f, 0.20f, 0.20f, 0.40f);
+		colors[ImGuiCol_ButtonHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.04f);
+		colors[ImGuiCol_ButtonActive] = ImVec4(0.34f, 0.06f, 0.98f, 1.00f);
+		colors[ImGuiCol_Header] = ImVec4(1.00f, 1.00f, 1.00f, 0.04f);
+		colors[ImGuiCol_HeaderHovered] = ImVec4(0.15f, 0.15f, 0.15f, 0.80f);
+		colors[ImGuiCol_HeaderActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.04f);
+		colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
+		colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
+		colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
+		colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.04f);
+		colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.13f);
+		colors[ImGuiCol_ResizeGripActive] = ImVec4(0.38f, 0.38f, 0.38f, 1.00f);
+		colors[ImGuiCol_TabHovered] = ImVec4(0.40f, 0.26f, 0.98f, 0.50f);
+		colors[ImGuiCol_Tab] = ImVec4(0.18f, 0.20f, 0.58f, 0.73f);
+		colors[ImGuiCol_TabSelected] = ImVec4(0.29f, 0.20f, 0.68f, 1.00f);
+		colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		colors[ImGuiCol_TabDimmed] = ImVec4(0.07f, 0.10f, 0.15f, 0.97f);
+		colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.14f, 0.26f, 0.42f, 1.00f);
+		colors[ImGuiCol_TabDimmedSelectedOverline] = ImVec4(0.50f, 0.50f, 0.50f, 0.00f);
+		colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+		colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+		colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+		colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+		colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
+		colors[ImGuiCol_TableBorderStrong] = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);
+		colors[ImGuiCol_TableBorderLight] = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);
+		colors[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
+		colors[ImGuiCol_TextLink] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		colors[ImGuiCol_TextSelectedBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.04f);
+		colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
+		colors[ImGuiCol_NavCursor] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+		colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+		colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-	bool checkbox{};
+
+		style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+		style.WindowPadding = ImVec2(4.0f, 4.0f);
+		style.WindowRounding = 7.0f;
+		style.FrameRounding = 3.0f;
+		style.GrabMinSize = 20.0f;
+		style.SeparatorTextBorderSize = 2.0f;
+	}
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwGetWindowSize(window, &width, &height);
@@ -316,19 +279,9 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		if (Options::b_enable_menu)
+		if (Settings::enable_menu)
 		{
-			ImGui::SetNextWindowSize(ImVec2(width * 0.3f, height * 0.3f));
-
-			ImGui::Begin("Key Of The Twilight", nullptr, ImGuiWindowFlags_NoTitleBar);
-			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize("key of the twilight").x / 2);
-
-			ImGui::Text("Key Of The Twilight");
-			ImGui::Checkbox("Drinker", &checkbox);
-			//ImGui::InputText("#key", )
-			ImGui::SetCursorPosY(ImGui::GetWindowHeight() * 0.9f);
-			ImGui::Text("Framerate: %.2f", io.Framerate);
-			ImGui::End();
+			Menu::Render(width, height);
 		}
 
 		//RENDERING
@@ -340,19 +293,22 @@ int main()
 		glViewport(0, 0, display_w, display_h);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		if (Options::b_enable_snaplines)
+		if (Settings::visuals_enabled)
 		{
-			visuals.snaplines(Options::b_enable_outlined_snaplines, display_w, display_h);
-		}
+			if (Settings::visuals_snaplines)
+			{
+				visuals.snaplines(Settings::visuals_ignore_teammates, Settings::visuals_outlined, display_w, display_h);
+			}
 
-		if (Options::b_enable_rect)
-		{
-			visuals.bounding_box(Options::b_enable_outlined_esp, Options::b_enable_filled_rect, display_w, display_h);
-		}
+			if (Settings::visuals_bounding_box)
+			{
+				visuals.bounding_box(Settings::visuals_ignore_teammates, Settings::visuals_outlined, Settings::visuals_filled_bounding_box, display_w, display_h);
+			}
 
-		if (Options::b_enable_health_esp)
-		{
-			visuals.health(Options::b_enable_outlined_health, display_w, display_h);
+			if (Settings::visuals_health_bar)
+			{
+				visuals.health(Settings::visuals_ignore_teammates, Settings::visuals_outlined, display_w, display_h);
+			}
 		}
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

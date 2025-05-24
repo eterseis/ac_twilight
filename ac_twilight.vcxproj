@@ -168,14 +168,15 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maths.cpp" />
     <ClCompile Include="memory.cpp" />
+    <ClCompile Include="menu.cpp" />
     <ClCompile Include="miscellaneous.cpp" />
     <ClCompile Include="offsets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aimbot.h" />
-    <ClInclude Include="constants.h" />
     <ClInclude Include="GLCommon.h" />
     <ClInclude Include="globals.h" />
+    <ClInclude Include="menu.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="Dependencies\imgui\imconfig.h" />
