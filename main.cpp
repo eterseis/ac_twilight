@@ -1,23 +1,5 @@
-#include <iostream>
-#include <array>
-#include <thread>
-#include <chrono>
-#include "memory.h"
-#include "offsets.h"
-#include "miscellaneous.h"
-#include "entity.h"
-#include "maths.h"
-#include "vector.h"
-#include "aimbot.h"
-#include "esp.h"
-#include "globals.h"
-#include "menu.h"
-#include "settings.h"
-
-#include "GLCommon.h"
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include "pch.hpp"
+#include "includes.hpp"
 
 using namespace std::chrono_literals;
 
@@ -62,6 +44,11 @@ void handle_input(GLFWwindow* window)
 			Settings::enable_menu = !Settings::enable_menu;
 
 			Settings::enable_menu ? show_menu(window) : hide_menu(window);
+		}
+		//panic key
+		if (GetAsyncKeyState(VK_NUMPAD0))
+		{
+			glfwSetWindowShouldClose(window, true);
 		}
 		std::this_thread::sleep_for(std::chrono::microseconds(5));
 	}
@@ -143,6 +130,29 @@ void helper()
 	}
 }
 
+void triggerbot()
+{
+	/*while (true)
+	{*/
+	if (Settings::aim_triggerbot)
+	{
+		INPUT inputs[2] = { };
+
+		inputs[0].type = INPUT_MOUSE;
+		inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+
+
+		inputs[1].type = INPUT_MOUSE;
+		inputs[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
+
+		SendInput(1, inputs, sizeof(INPUT));
+		std::this_thread::sleep_for(1ms);
+		SendInput(1, &inputs[1], sizeof(INPUT));
+	}
+	//std::this_thread::sleep_for(5ms);
+	//}
+}
+
 int main()
 {
 	constexpr char glsl_version[]{ "#version 130" };
@@ -184,16 +194,12 @@ int main()
 		std::thread thread_aimbot_and_populate_and_sort(aimbot_and_populate_sort);
 		thread_aimbot_and_populate_and_sort.detach();
 
-		/*std::thread thread_debug_mode(debug_mode);
-		thread_debug_mode.detach();*/
-
 		std::thread thread_helper(helper);
 		thread_helper.detach();
 	}
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	//ImGuiIO& io = ImGui::GetIO();
 
 	ImGui::StyleColorsDark();
 
@@ -281,6 +287,7 @@ int main()
 
 		if (Settings::enable_menu)
 		{
+			//ImGui::ShowDemoWindow();
 			Menu::Render(width, height);
 		}
 
@@ -295,19 +302,37 @@ int main()
 
 		if (Settings::visuals_enabled)
 		{
+			/*{
+				Entity& ent{ get_closest_entity(false, Globals::entities, Globals::current_entities) };
+				Vector3& top_coords{ ent.m_head_coords };
+
+				Vector2 abu;
+				Maths::world_to_screen(top_coords, abu, visuals.matrix, display_w, display_h);
+
+				std::cout << "\n";
+				std::cout << ent.m_name << ": " << abu.x << "::" << abu.y << "\n";
+
+				if (abu.x <= 0.01f && abu.x >= -0.02f)
+				{
+					std::cout << "\nAss Triggabot\n";
+
+					triggerbot();
+
+				}
+			}*/
 			if (Settings::visuals_snaplines)
 			{
-				visuals.snaplines(Settings::visuals_ignore_teammates, Settings::visuals_outlined, display_w, display_h);
+				visuals.snaplines(Settings::visuals_ignore_teammates, Settings::visuals_outlined, display_w, display_h, Settings::visuals_snaplines_color);
 			}
 
 			if (Settings::visuals_bounding_box)
 			{
-				visuals.bounding_box(Settings::visuals_ignore_teammates, Settings::visuals_outlined, Settings::visuals_filled_bounding_box, display_w, display_h);
+				visuals.bounding_box(Settings::visuals_ignore_teammates, Settings::visuals_outlined, Settings::visuals_filled_bounding_box, display_w, display_h, Settings::visuals_bounding_box_color);
 			}
 
 			if (Settings::visuals_health_bar)
 			{
-				visuals.health(Settings::visuals_ignore_teammates, Settings::visuals_outlined, display_w, display_h);
+				visuals.health(Settings::visuals_ignore_teammates, Settings::visuals_outlined, display_w, display_h, Settings::visuals_health_bar_color);
 			}
 		}
 

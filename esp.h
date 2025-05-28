@@ -18,12 +18,12 @@ class ESP
 public:
 	bool valid_entity(Entity& ent);
 	// w == width //
-	void draw_rect(bool outlined, float x, float x2, float y, float y2, float w, Vector3 color);
-	void draw_filled_rect(bool outlined, float x, float x2, float y, float y2, float w, Vector3 color);
-	void draw_lines(float thickness, bool outlined, float x, float x2, float y, float y2, float w, Vector3 color);
-	void snaplines(bool ignore_teammates, bool outlined, int display_w, int display_h);
-	void bounding_box(bool ignore_teammates, bool outlined, bool filled, int display_w, int display_h);
-	void health(bool ignore_teammates, bool outlined, int display_w, int display_h);
+	void draw_rect(bool outlined, float x, float x2, float y, float y2, float w, Vector4 color);
+	void draw_filled_rect(bool outlined, float x, float x2, float y, float y2, float w, Vector4 color);
+	void draw_lines(float thickness, bool outlined, float x, float x2, float y, float y2, float w, Vector4 color);
+	void snaplines(bool ignore_teammates, bool outlined, int display_w, int display_h, Vector4 color);
+	void bounding_box(bool ignore_teammates, bool outlined, bool filled, int display_w, int display_h, Vector4 color);
+	void health(bool ignore_teammates, bool outlined, int display_w, int display_h, Vector4 color);
 
 public:
 	std::array<float, 16> matrix;

@@ -35,7 +35,7 @@ void Maths::bubble_sort(std::array<Entity, 32>& arr, const size_t& current_entit
 	}
 }
 
-bool Maths::world_to_screen(Vector3& pos, Vector2& screen, const std::array<float, 16> matrix, int window_width, int window_height)
+bool Maths::world_to_screen(const Vector3& pos, Vector2& screen, const std::array<float, 16> matrix, int window_width, int window_height)
 {
 	Vector4 convert;
 

@@ -13,7 +13,7 @@ bool ESP::valid_entity(Entity& ent)
 	return false;
 }
 
-void ESP::draw_rect(bool outlined, float x, float x2, float y, float y2, float w /*width*/, Vector3 color)
+void ESP::draw_rect(bool outlined, float x, float x2, float y, float y2, float w /*width*/, Vector4 color)
 {
 	if (outlined)
 	{
@@ -34,7 +34,7 @@ void ESP::draw_rect(bool outlined, float x, float x2, float y, float y2, float w
 		glEnd();
 	}
 	glLineWidth(1.0f);
-	glColor3f(color.x, color.y, color.z);
+	glColor4f(color.x, color.y, color.z, color.w);
 	glBegin(GL_LINES);
 	glVertex2f(x - w, y);
 	glVertex2f(x + w, y);
@@ -50,7 +50,7 @@ void ESP::draw_rect(bool outlined, float x, float x2, float y, float y2, float w
 	glEnd();
 }
 
-void ESP::draw_filled_rect(bool outlined, float x, float x2, float y, float y2, float w, Vector3 color)
+void ESP::draw_filled_rect(bool outlined, float x, float x2, float y, float y2, float w, Vector4 color)
 {
 	if (outlined)
 	{
@@ -71,7 +71,7 @@ void ESP::draw_filled_rect(bool outlined, float x, float x2, float y, float y2, 
 		glEnd();
 	}
 	glLineWidth(1.0f);
-	glColor4f(color.x, color.y, color.z, 0.4f);
+	glColor4f(color.x, color.y, color.z, color.w);
 	glBegin(GL_TRIANGLES);
 	glVertex2f(x2 - w, y2);
 	glVertex2f(x2 + w, y2);
@@ -83,7 +83,7 @@ void ESP::draw_filled_rect(bool outlined, float x, float x2, float y, float y2, 
 	glEnd();
 }
 
-void ESP::draw_lines(float thickness, bool outlined, float x, float x2, float y, float y2, float w, Vector3 color)
+void ESP::draw_lines(float thickness, bool outlined, float x, float x2, float y, float y2, float w, Vector4 color)
 {
 	if (outlined)
 	{
@@ -96,14 +96,14 @@ void ESP::draw_lines(float thickness, bool outlined, float x, float x2, float y,
 	}
 
 	glLineWidth(thickness);
-	glColor3f(color.x, color.y, color.z);
+	glColor4f(color.x, color.y, color.z, color.w);
 	glBegin(GL_LINES);
 	glVertex2f(x - w, y);
 	glVertex2f(x2 - w, y2);
 	glEnd();
 }
 
-void ESP::snaplines(bool ignore_teammates, bool outlined, int display_w, int display_h)
+void ESP::snaplines(bool ignore_teammates, bool outlined, int display_w, int display_h, Vector4 color)
 {
 	for (size_t i{}; i < Globals::current_entities; ++i)
 	{
@@ -116,15 +116,11 @@ void ESP::snaplines(bool ignore_teammates, bool outlined, int display_w, int dis
 
 		if (!Maths::world_to_screen(Globals::entities[i].m_coords, bottom_coords, matrix, display_w, display_h)) continue;
 
-		Vector3 color;
-		if (Globals::myself.m_team == Globals::entities[i].m_team) color = Vector3(1.0f, 1.0f, 1.0f);
-		else color = Vector3(1.0f, 0.0f, 0.0f);
-
 		draw_lines(1.0f, outlined, origin_bottom.x, bottom_coords.x, origin_bottom.y, bottom_coords.y, 0.0f, color);
 	}
 }
 
-void ESP::bounding_box(bool ignore_teammates, bool outlined, bool filled, int display_w, int display_h)
+void ESP::bounding_box(bool ignore_teammates, bool outlined, bool filled, int display_w, int display_h, Vector4 color)
 {
 	for (size_t i{}; i < Globals::current_entities; ++i)
 	{
@@ -144,10 +140,6 @@ void ESP::bounding_box(bool ignore_teammates, bool outlined, bool filled, int di
 		float h = top_coords.y - bottom_coords.y;
 		float w = h / 5.0f;
 
-		Vector3 color;
-		if (Globals::myself.m_team == Globals::entities[i].m_team) color = Vector3{ 1.0f, 1.0f, 1.0f };
-		else color = Vector3{ 1.0f, 0.0f, 0.0f };
-
 		if (!filled)
 		{
 			draw_rect(outlined, top_coords.x, bottom_coords.x, top_coords.y, bottom_coords.y, w, color);
@@ -159,7 +151,7 @@ void ESP::bounding_box(bool ignore_teammates, bool outlined, bool filled, int di
 	}
 }
 
-void ESP::health(bool ignore_teammates, bool outlined, int display_w, int display_h)
+void ESP::health(bool ignore_teammates, bool outlined, int display_w, int display_h, Vector4 color)
 {
 	for (size_t i{}; i < Globals::current_entities; ++i)
 	{
@@ -186,11 +178,10 @@ void ESP::health(bool ignore_teammates, bool outlined, int display_w, int displa
 
 		if (outlined)
 		{
-			Vector3 color_black{ 0.0f, 0.0f, 0.0f };
+			Vector4 color_black{ 0.0f, 0.0f, 0.0f, 1.0f };
 			draw_lines(2.0f, false, top_coords.x, bottom_coords.x, top_coords.y, bottom_coords.y, width, color_black);
 		}
 
-		Vector3 color_green{ 0.0f, 1.0f, 0.0f };
-		draw_lines(1.0f, false, x, bottom_coords.x, y, bottom_coords.y, width, color_green);
+		draw_lines(1.0f, false, x, bottom_coords.x, y, bottom_coords.y, width, color);
 	}
 }

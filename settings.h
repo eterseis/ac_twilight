@@ -30,4 +30,5 @@ namespace Settings
 
 	inline bool aim_enabled{};
 	inline bool aim_ignore_teammates{ };
+	inline bool aim_triggerbot{};
 }

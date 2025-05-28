@@ -1,4 +1,5 @@
 #include "aimbot.h"
+#include "maths.h"
 
 void Aimbot::closest_target(bool ignore_teammates, Entity& target, Entity& local_player)
 {
