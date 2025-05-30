@@ -3,28 +3,31 @@
 #include "offsets.h"
 
 
-float Maths::distance_from_me(Entity& enemy, const Entity& me)
+float Maths::distance_from(const vec3& a, const vec3& b)
 {
-	Vector3 p;
-	p.x = (enemy.m_coords.x - me.m_coords.x) * (enemy.m_coords.x - me.m_coords.x);
-	p.y = (enemy.m_coords.y - me.m_coords.y) * (enemy.m_coords.y - me.m_coords.y);
-	p.z = (enemy.m_coords.z - me.m_coords.z) * (enemy.m_coords.z - me.m_coords.z);
+	vec3 p;
+	p.x = (a.x - b.x) * (a.x - b.x);
+	p.y = (a.y - b.y) * (a.y - b.y);
+	p.z = (a.z - b.z) * (a.z - b.z);
 
 	return sqrtf(p.x + p.y + p.z);
 }
 
-void Maths::bubble_sort(std::array<Entity, 32>& arr, const size_t& current_entities)
+void Maths::bubble_sort(std::array<Entity, 31>& ents, Entity& myself)
 {
-	for (size_t i{}; i < current_entities - 1; i++)
+	size_t loaded_ents{ Globals::current_entities };
+	for (size_t i{}; i < loaded_ents - 1; i++)
 	{
 		bool flag{};
-		for (size_t j{}; j < current_entities - i - 1; ++j)
+		for (size_t j{}; j < loaded_ents - i - 1; ++j)
 		{
-			if (arr[j].m_distance_from_local_player > arr[j + 1].m_distance_from_local_player)
+			float ent_distance{ Maths::distance_from(myself.feet, ents[j].feet) };
+			float ent2_distance{ Maths::distance_from(myself.feet, ents[j + 1].feet) };
+			if (ent_distance > ent2_distance)
 			{
-				Entity backup{ arr[j] };
-				arr[j] = arr[j + 1];
-				arr[j + 1] = backup;
+				Entity backup{ ents[j] };
+				ents[j] = ents[j + 1];
+				ents[j + 1] = backup;
 
 				flag = true;
 			}
@@ -35,9 +38,9 @@ void Maths::bubble_sort(std::array<Entity, 32>& arr, const size_t& current_entit
 	}
 }
 
-bool Maths::world_to_screen(const Vector3& pos, Vector2& screen, const std::array<float, 16> matrix, int window_width, int window_height)
+bool Maths::world_to_screen(const vec3& pos, vec2& screen, const std::array<float, 16>& matrix, int window_width, int window_height)
 {
-	Vector4 convert;
+	vec4 convert;
 
 	convert.x = (pos.x * matrix[0]) + (pos.y * matrix[4]) + (pos.z * matrix[8]) + matrix[12];
 	convert.y = (pos.x * matrix[1]) + (pos.y * matrix[5]) + (pos.z * matrix[9]) + matrix[13];
@@ -47,7 +50,7 @@ bool Maths::world_to_screen(const Vector3& pos, Vector2& screen, const std::arra
 	if (convert.w < 0.1f)
 		return false;
 
-	Vector3 NDC;
+	vec3 NDC;
 	NDC.x = convert.x / convert.w;
 	NDC.y = convert.y / convert.w;
 	NDC.z = convert.z / convert.w;

@@ -1,11 +1,11 @@
 #pragma once
-#include "entity.h"
+#include "entity.hpp"
 #include "vector.h"
 #include <array>
 
 namespace Maths
 {
-	float distance_from_me(Entity& enemy, const Entity& me);
-	void bubble_sort(std::array<Entity, 32>& arr, const size_t& current_entities);
-	bool world_to_screen(const Vector3& pos, Vector2& screen, const std::array<float, 16> matrix, int window_width, int window_height);
+	float distance_from(const vec3& a, const vec3& b);
+	void bubble_sort(std::array<Entity, 31>& arr, Entity& myself);
+	bool world_to_screen(const vec3& pos, vec2& screen, const std::array<float, 16> matrix, int window_width, int window_height);
 }
