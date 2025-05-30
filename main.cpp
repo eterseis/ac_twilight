@@ -1,10 +1,31 @@
 #include "pch.hpp"
 #include "includes.hpp"
 
+struct Timer
+{
+	std::chrono::time_point<std::chrono::steady_clock> start{}, end{};
+	std::chrono::duration<float> duration{};
+
+	Timer()
+	{
+		start = std::chrono::high_resolution_clock::now();
+	}
+
+	~Timer()
+	{
+		end = std::chrono::high_resolution_clock::now();
+		duration = end - start;
+
+		float ms{ duration.count() * 1000.0f };
+		std::cout << "Timer took: " << ms << "ms\n";
+	}
+};
+
 using namespace std::chrono_literals;
 
 Miscellaneous misc;
 ESP visuals;
+
 
 void hide_menu(GLFWwindow* window)
 {
@@ -124,34 +145,34 @@ void helper()
 	{
 		Globals::current_entities = offsets::get_max_entities() - 1 /*except me*/;
 		update_local_player();
-		visuals.matrix = offsets::get_view_matrix();
+		visuals.m_matrix = offsets::get_view_matrix();
 
 		std::this_thread::sleep_for(1ms);
 	}
 }
 
-void triggerbot()
-{
-	/*while (true)
-	{*/
-	if (Settings::aim_triggerbot)
-	{
-		INPUT inputs[2] = { };
+//void triggerbot()
+//{
+//	/*while (true)
+//	{*/
+//	if (Settings::aim_triggerbot)
+//	{
+//		INPUT inputs[2] = { };
+//
+//		inputs[0].type = INPUT_MOUSE;
+//		inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+//
+//
+//		inputs[1].type = INPUT_MOUSE;
+//		inputs[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
+//
+//		SendInput(1, inputs, sizeof(INPUT));
+//		std::this_thread::sleep_for(1ms);
+//		SendInput(1, &inputs[1], sizeof(INPUT));
+//	}
+//	//std::this_thread::sleep_for(5ms);
+//	//}
 
-		inputs[0].type = INPUT_MOUSE;
-		inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-
-
-		inputs[1].type = INPUT_MOUSE;
-		inputs[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
-
-		SendInput(1, inputs, sizeof(INPUT));
-		std::this_thread::sleep_for(1ms);
-		SendInput(1, &inputs[1], sizeof(INPUT));
-	}
-	//std::this_thread::sleep_for(5ms);
-	//}
-}
 
 int main()
 {
@@ -180,6 +201,7 @@ int main()
 
 	if (glewInit() != GLEW_OK)
 		std::cout << "Failed to initialize GLEW\n";
+
 
 	{
 		std::thread thread_handle_input(handle_input, window);
@@ -302,37 +324,27 @@ int main()
 
 		if (Settings::visuals_enabled)
 		{
-			/*{
-				Entity& ent{ get_closest_entity(false, Globals::entities, Globals::current_entities) };
-				Vector3& top_coords{ ent.m_head_coords };
+			Timer t;
 
-				Vector2 abu;
-				Maths::world_to_screen(top_coords, abu, visuals.matrix, display_w, display_h);
+			visuals.m_ignore_teammates = Settings::visuals_ignore_teammates;
+			visuals.m_outlined = Settings::visuals_outlined;
+			visuals.m_display_w = display_w;
+			visuals.m_display_h = display_h;
 
-				std::cout << "\n";
-				std::cout << ent.m_name << ": " << abu.x << "::" << abu.y << "\n";
 
-				if (abu.x <= 0.01f && abu.x >= -0.02f)
-				{
-					std::cout << "\nAss Triggabot\n";
-
-					triggerbot();
-
-				}
-			}*/
 			if (Settings::visuals_snaplines)
 			{
-				visuals.snaplines(Settings::visuals_ignore_teammates, Settings::visuals_outlined, display_w, display_h, Settings::visuals_snaplines_color);
+				visuals.snaplines(Settings::visuals_snaplines_color);
 			}
 
 			if (Settings::visuals_bounding_box)
 			{
-				visuals.bounding_box(Settings::visuals_ignore_teammates, Settings::visuals_outlined, Settings::visuals_filled_bounding_box, display_w, display_h, Settings::visuals_bounding_box_color);
+				visuals.bounding_box(Settings::visuals_filled_bounding_box, Settings::visuals_bounding_box_color);
 			}
 
 			if (Settings::visuals_health_bar)
 			{
-				visuals.health(Settings::visuals_ignore_teammates, Settings::visuals_outlined, display_w, display_h, Settings::visuals_health_bar_color);
+				visuals.health(Settings::visuals_health_bar_color);
 			}
 		}
 

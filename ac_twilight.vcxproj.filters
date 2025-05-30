@@ -34,7 +34,7 @@
     <Filter Include="Header Files\Globals">
       <UniqueIdentifier>{91422fa5-66df-4dd9-b858-32845cc8d863}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Menu">
+    <Filter Include="Source Files\Menu">
       <UniqueIdentifier>{ccb835f9-a5dd-40f1-8ea4-4f9794b22c30}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -85,7 +85,7 @@
       <Filter>Features\esp</Filter>
     </ClCompile>
     <ClCompile Include="menu.cpp">
-      <Filter>Header Files\Menu</Filter>
+      <Filter>Source Files\Menu</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
@@ -153,12 +153,15 @@
       <Filter>Header Files\Globals</Filter>
     </ClInclude>
     <ClInclude Include="menu.h">
-      <Filter>Header Files\Menu</Filter>
+      <Filter>Source Files\Menu</Filter>
     </ClInclude>
     <ClInclude Include="pch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="includes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

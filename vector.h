@@ -1,16 +1,16 @@
 #pragma once
 
-struct Vector2
+typedef struct Vector2
 {
 	float x, y;
-};
+}vec2;
 
-struct Vector3
+typedef struct Vector3
 {
 	float x, y, z;
-};
+}vec3;
 
-struct Vector4
+typedef struct Vector4
 {
 	float x, y, z, w;
-};
+}vec4;

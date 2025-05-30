@@ -21,10 +21,14 @@ public:
 	void draw_rect(bool outlined, float x, float x2, float y, float y2, float w, Vector4 color);
 	void draw_filled_rect(bool outlined, float x, float x2, float y, float y2, float w, Vector4 color);
 	void draw_lines(float thickness, bool outlined, float x, float x2, float y, float y2, float w, Vector4 color);
-	void snaplines(bool ignore_teammates, bool outlined, int display_w, int display_h, Vector4 color);
-	void bounding_box(bool ignore_teammates, bool outlined, bool filled, int display_w, int display_h, Vector4 color);
-	void health(bool ignore_teammates, bool outlined, int display_w, int display_h, Vector4 color);
+	void snaplines(Vector4 color);
+	void bounding_box(bool filled, Vector4 color);
+	void health(Vector4 color);
 
 public:
-	std::array<float, 16> matrix;
+	std::array<float, 16> m_matrix{};
+	bool m_ignore_teammates{};
+	bool m_outlined{};
+	int m_display_w{};
+	int m_display_h{};
 };

@@ -1,5 +1,7 @@
 #include "esp.h"
 #include <iostream>
+#include <mutex>
+#include <future>
 
 bool ESP::valid_entity(Entity& ent)
 {
@@ -103,70 +105,73 @@ void ESP::draw_lines(float thickness, bool outlined, float x, float x2, float y,
 	glEnd();
 }
 
-void ESP::snaplines(bool ignore_teammates, bool outlined, int display_w, int display_h, Vector4 color)
+void ESP::snaplines(Vector4 color)
 {
 	for (size_t i{}; i < Globals::current_entities; ++i)
 	{
 		if (!valid_entity(Globals::entities[i])) continue;
 
-		if (ignore_teammates && Globals::entities[i].m_team == Globals::myself.m_team) continue;
+		if (m_ignore_teammates && Globals::entities[i].m_team == Globals::myself.m_team) continue;
 		if (!Globals::entities[i].isAlive()) continue;
 
+		Vector3& bot_origin{ Globals::entities[i].m_coords };
 		Vector2 bottom_coords;
 
-		if (!Maths::world_to_screen(Globals::entities[i].m_coords, bottom_coords, matrix, display_w, display_h)) continue;
+		if (!Maths::world_to_screen(bot_origin, bottom_coords, m_matrix, m_display_w, m_display_h)) continue;
 
-		draw_lines(1.0f, outlined, origin_bottom.x, bottom_coords.x, origin_bottom.y, bottom_coords.y, 0.0f, color);
+		draw_lines(1.0f, m_outlined, origin_bottom.x, bottom_coords.x, origin_bottom.y, bottom_coords.y, 0.0f, color);
 	}
 }
 
-void ESP::bounding_box(bool ignore_teammates, bool outlined, bool filled, int display_w, int display_h, Vector4 color)
+void ESP::bounding_box(bool filled, Vector4 color)
 {
 	for (size_t i{}; i < Globals::current_entities; ++i)
 	{
-		if (!valid_entity(Globals::entities[i]))	continue;
+		if (!valid_entity(Globals::entities[i])) continue;
 
-		if (ignore_teammates && Globals::entities[i].m_team == Globals::myself.m_team) continue;
-		if (!Globals::entities[i].isAlive())	continue;
+		if (m_ignore_teammates && Globals::entities[i].m_team == Globals::myself.m_team) continue;
+		if (!Globals::entities[i].isAlive()) continue;
 
+		Vector3& bot_origin{ Globals::entities[i].m_coords };
 		Vector3 bot_head{ Globals::entities[i].m_head_coords.x, Globals::entities[i].m_head_coords.y, Globals::entities[i].m_head_coords.z + 0.8f };
 
 		Vector2 bottom_coords;
 		Vector2 top_coords;
 
-		if (!Maths::world_to_screen(Globals::entities[i].m_coords, bottom_coords, matrix, display_w, display_h))	 continue;
-		if (!Maths::world_to_screen(bot_head, top_coords, matrix, display_w, display_h))	continue;
+		if (!Maths::world_to_screen(bot_origin, bottom_coords, m_matrix, m_display_w, m_display_h)) continue;
+		if (!Maths::world_to_screen(bot_head, top_coords, m_matrix, m_display_w, m_display_h)) continue;
 
 		float h = top_coords.y - bottom_coords.y;
 		float w = h / 5.0f;
 
 		if (!filled)
 		{
-			draw_rect(outlined, top_coords.x, bottom_coords.x, top_coords.y, bottom_coords.y, w, color);
+			draw_rect(m_outlined, top_coords.x, bottom_coords.x, top_coords.y, bottom_coords.y, w, color);
 		}
 		else
 		{
-			draw_filled_rect(outlined, top_coords.x, bottom_coords.x, top_coords.y, bottom_coords.y, w, color);
+			draw_filled_rect(m_outlined, top_coords.x, bottom_coords.x, top_coords.y, bottom_coords.y, w, color);
 		}
 	}
 }
 
-void ESP::health(bool ignore_teammates, bool outlined, int display_w, int display_h, Vector4 color)
+void ESP::health(Vector4 color)
 {
 	for (size_t i{}; i < Globals::current_entities; ++i)
 	{
 		if (!valid_entity(Globals::entities[i])) continue;
 
-		if (ignore_teammates && Globals::entities[i].m_team == Globals::myself.m_team) continue;
-		if (!Globals::entities[i].isAlive())	continue;
+		if (m_ignore_teammates && Globals::entities[i].m_team == Globals::myself.m_team) continue;
+		if (!Globals::entities[i].isAlive()) continue;
 
+		Vector3& bot_origin{ Globals::entities[i].m_coords };
 		Vector3 bot_head{ Globals::entities[i].m_head_coords.x, Globals::entities[i].m_head_coords.y, Globals::entities[i].m_head_coords.z + 0.8f };
 
 		Vector2 bottom_coords;
 		Vector2 top_coords;
 
-		if (!Maths::world_to_screen(Globals::entities[i].m_coords, bottom_coords, matrix, display_w, display_h))	continue;
-		if (!Maths::world_to_screen(bot_head, top_coords, matrix, display_w, display_h))	continue;
+		if (!Maths::world_to_screen(bot_origin, bottom_coords, m_matrix, m_display_w, m_display_h))	continue;
+		if (!Maths::world_to_screen(bot_head, top_coords, m_matrix, m_display_w, m_display_h))	continue;
 
 		float height = top_coords.y - bottom_coords.y;
 		float width = height / 4.0f;
@@ -176,7 +181,7 @@ void ESP::health(bool ignore_teammates, bool outlined, int display_w, int displa
 		float x = top_coords.x + t * (bottom_coords.x - top_coords.x);
 		float y = top_coords.y + t * (bottom_coords.y - top_coords.y);
 
-		if (outlined)
+		if (m_outlined)
 		{
 			Vector4 color_black{ 0.0f, 0.0f, 0.0f, 1.0f };
 			draw_lines(2.0f, false, top_coords.x, bottom_coords.x, top_coords.y, bottom_coords.y, width, color_black);
