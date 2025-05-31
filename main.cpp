@@ -54,41 +54,44 @@ void handle_input(GLFWwindow* window)
 	}
 }
 
-void miscellaneous()
+void miscellaneous(Entity* myself)
 {
+	uintptr_t myself_address;
 	while (true)
 	{
-		if (Globals::myself.vf_table == offsets::vf_table_player)
+		myself_address = offsets::get_local_player();
+		if (myself->vf_table == offsets::vf_table_player)
 		{
 			if (Settings::misc_unlimited_health)
 			{
-				misc.unlimited_health(Globals::myself.m_address);
+				misc.unlimited_health(myself_address);
 			}
 			if (Settings::misc_unlimited_ammo)
 			{
-				misc.unlimited_ammo(Globals::myself.m_address);
+				misc.unlimited_ammo(myself_address);
 			}
 			if (Settings::misc_rapidfire)
 			{
-				misc.rapidfire(Globals::myself.m_address, Settings::misc_rapidfire_delay);
+				misc.rapidfire(myself_address, Settings::misc_rapidfire_delay);
 			}
 		}
 		std::this_thread::sleep_for(std::chrono::microseconds(5));
 	}
 }
 
-void aimbot_and_populate_sort()
+void aimbot_and_populate_sort(std::array<uintptr_t, 31> ents_ptr, std::array<Entity, 31>& entities, Entity& myself)
 {
 	while (true)
 	{
 		if (Globals::current_entities > 0)
 		{
-			populate_entity_array(Globals::entities, Globals::current_entities);
-			Maths::bubble_sort(Globals::entities, Globals::current_entities);
+			populate_entity_array(ents_ptr, entities);
 
 			if (Settings::aim_enabled)
 			{
-				Aimbot::closest_target(Settings::aim_ignore_teammates, get_closest_entity(Settings::aim_ignore_teammates, Globals::entities, Globals::current_entities), Globals::myself);
+				bool ignore{ Settings::aim_ignore_teammates };
+				Entity& closest_ent{ get_closest_entity(ignore, entities, myself) };
+				Aimbot::closest_target(ignore, &closest_ent, &myself);
 			}
 		}
 		std::this_thread::sleep_for(1ms);
@@ -118,12 +121,12 @@ void overlay(GLFWwindow* window)
 	}
 }
 
-void helper()
+void helper(Entity& myself)
 {
 	while (true)
 	{
 		Globals::current_entities = offsets::get_max_entities() - 1 /*except me*/;
-		update_local_player();
+		update_local_player(myself);
 		visuals.matrix = offsets::get_view_matrix();
 
 		std::this_thread::sleep_for(1ms);
@@ -178,24 +181,36 @@ int main()
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
-	if (glewInit() != GLEW_OK)
-		std::cout << "Failed to initialize GLEW\n";
+	if (glewInit() != GLEW_OK)	std::cout << "Failed to initialize GLEW\n";
 
+	/*carrot cake*/
+	std::array<uintptr_t, 31> ents_ptr;
+	Globals::mem.ReadArray<std::array<uintptr_t, 31>>(offsets::get_entity_list(), &ents_ptr);
+
+	std::array<Entity, 31> ents;
+	populate_entity_array(ents_ptr, ents);
+
+	Entity myself;
+	Globals::mem.ReadStruct<Entity>(offsets::get_local_player(), myself);
+
+
+	//fix the threads with the new entity sdasdsablla;
 	{
-		std::thread thread_handle_input(handle_input, window);
-		thread_handle_input.detach();
+		std::thread handle_input(handle_input, window);
+		handle_input.detach();
 
-		std::thread thread_overlay(overlay, window);
-		thread_overlay.detach();
+		std::thread overlay(overlay, window);
+		overlay.detach();
 
-		std::thread thread_misc(miscellaneous);
-		thread_misc.detach();
+		/*			features		*/
+		std::thread misc(miscellaneous, &myself);
+		misc.detach();
 
-		std::thread thread_aimbot_and_populate_and_sort(aimbot_and_populate_sort);
-		thread_aimbot_and_populate_and_sort.detach();
+		std::thread aimbot_and_populate_and_sort(aimbot_and_populate_sort, ents_ptr, ents, myself);
+		aimbot_and_populate_and_sort.detach();
 
-		std::thread thread_helper(helper);
-		thread_helper.detach();
+		std::thread helper(helper, myself);
+		helper.detach();
 	}
 
 	IMGUI_CHECKVERSION();
@@ -302,24 +317,7 @@ int main()
 
 		if (Settings::visuals_enabled)
 		{
-			/*{
-				Entity& ent{ get_closest_entity(false, Globals::entities, Globals::current_entities) };
-				Vector3& top_coords{ ent.m_head_coords };
 
-				Vector2 abu;
-				Maths::world_to_screen(top_coords, abu, visuals.matrix, display_w, display_h);
-
-				std::cout << "\n";
-				std::cout << ent.m_name << ": " << abu.x << "::" << abu.y << "\n";
-
-				if (abu.x <= 0.01f && abu.x >= -0.02f)
-				{
-					std::cout << "\nAss Triggabot\n";
-
-					triggerbot();
-
-				}
-			}*/
 			if (Settings::visuals_snaplines)
 			{
 				visuals.snaplines(Settings::visuals_ignore_teammates, Settings::visuals_outlined, display_w, display_h, Settings::visuals_snaplines_color);

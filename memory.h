@@ -45,6 +45,13 @@ public:
 	{
 		WriteProcessMemory(m_hProcess, reinterpret_cast<void*>(address), &value, sizeof(T), nullptr);
 	}
+
+	template <typename T>
+	constexpr void WriteVector(const uintptr_t address, const T& value) const
+	{
+		WriteProcessMemory(m_hProcess, reinterpret_cast<LPVOID>address, &value, sizeof(value), nullptr);
+	}
+
 private:
 	DWORD m_procId{};
 	HANDLE m_hProcess{};

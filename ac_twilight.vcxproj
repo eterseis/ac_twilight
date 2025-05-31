@@ -223,7 +223,7 @@
     <ClInclude Include="Dependencies\imgui\imstb_rectpack.h" />
     <ClInclude Include="Dependencies\imgui\imstb_textedit.h" />
     <ClInclude Include="Dependencies\imgui\imstb_truetype.h" />
-    <ClInclude Include="entity.h" />
+    <ClInclude Include="entity.hpp" />
     <ClInclude Include="esp.h" />
     <ClInclude Include="maths.h" />
     <ClInclude Include="memory.h" />

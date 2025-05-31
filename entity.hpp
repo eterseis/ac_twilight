@@ -27,8 +27,9 @@ struct Entity
 	std::byte team;
 
 	bool dead;
+	uintptr_t address;
 };
 
 void update_local_player(Entity& ent);
-void populate_entity_array(std::array<Entity, 31>& entities);
+void populate_entity_array(std::array<uintptr_t, 31> ents_ptr, std::array<Entity, 31>& entities);
 Entity& get_closest_entity(bool ignore_teammates, std::array<Entity, 31>& ents, Entity& myself);

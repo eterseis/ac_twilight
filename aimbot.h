@@ -5,5 +5,5 @@
 
 namespace Aimbot
 {
-	void closest_target(bool ignore_temmates, Entity& target, Entity& local_palyer);
+	void closest_target(bool ignore_temmates, Entity* target, Entity* local_palyer);
 }

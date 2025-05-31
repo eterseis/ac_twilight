@@ -1,11 +1,11 @@
 #include "esp.h"
 #include <iostream>
 
-bool ESP::valid_entity(Entity& ent)
+bool ESP::valid_entity(Entity* ent)
 {
-	if (ent.m_address)
+	if (ent->address)
 	{
-		if (ent.vf_table == offsets::vf_table_bot || ent.vf_table == offsets::vf_table_player)
+		if (ent->vf_table == offsets::vf_table_bot || ent->vf_table == offsets::vf_table_player)
 		{
 			return true;
 		}
@@ -105,16 +105,17 @@ void ESP::draw_lines(float thickness, bool outlined, float x, float x2, float y,
 
 void ESP::snaplines(bool ignore_teammates, bool outlined, int display_w, int display_h, Vector4 color)
 {
-	for (size_t i{}; i < Globals::current_entities; ++i)
+	size_t loaded_ents{ Globals::current_entities };
+	for (size_t i{}; i < loaded_ents; ++i)
 	{
-		if (!valid_entity(Globals::entities[i])) continue;
+		if (!valid_entity(&ents[i])) continue;
 
-		if (ignore_teammates && Globals::entities[i].m_team == Globals::myself.m_team) continue;
-		if (!Globals::entities[i].isAlive()) continue;
+		if (ents[i].dead) continue;
+		if (ignore_teammates && ents[i].team == myself->team) continue;
 
 		Vector2 bottom_coords;
 
-		if (!Maths::world_to_screen(Globals::entities[i].m_coords, bottom_coords, matrix, display_w, display_h)) continue;
+		if (!Maths::world_to_screen(ents[i].feet, bottom_coords, matrix, display_w, display_h)) continue;
 
 		draw_lines(1.0f, outlined, origin_bottom.x, bottom_coords.x, origin_bottom.y, bottom_coords.y, 0.0f, color);
 	}

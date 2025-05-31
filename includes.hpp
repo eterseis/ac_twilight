@@ -1,7 +1,7 @@
 #include "memory.h"
 #include "offsets.h"
 #include "miscellaneous.h"
-#include "entity.h"
+#include "entity.hpp"
 #include "maths.h"
 #include "vector.h"
 #include "aimbot.h"
